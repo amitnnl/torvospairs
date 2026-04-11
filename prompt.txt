@@ -1,0 +1,106 @@
+Create a complete, production-ready Inventory Management Web Application for managing Power Tools, Spare Parts, and Accessories.
+
+Tech Stack:
+- Backend: PHP (Core PHP or MVC structure)
+- Database: MySQL
+- Frontend: HTML, CSS, JavaScript (modern UI, responsive design)
+- Optional: Use Chart.js for dashboard analytics
+
+Main Goal:
+Build a system where spare parts and accessories can be filtered based on their compatibility with different power tools (like Drill, Grinder, Cutter, etc.).
+
+Core Features:
+
+1. Authentication System:
+- Login/logout functionality
+- User roles: Admin and Staff
+- Secure password handling
+
+2. Dashboard:
+- Total products count
+- Total tools count
+- Low stock alerts
+- Recent stock activity
+- Charts for inventory overview
+
+3. Category Management:
+- Add/Edit/Delete categories
+- Example: Drill Parts, Grinder Accessories, Cutting Tools
+
+4. Tool Management:
+- Add/Edit/Delete tools
+- Example: Drill Machine, Angle Grinder, Marble Cutter
+
+5. Product Management:
+- Add/Edit/Delete products
+- Fields:
+  - Product Name
+  - Category
+  - Brand
+  - Price
+  - Quantity (Stock)
+  - Description
+  - Image upload
+
+6. Compatibility Mapping (Important Feature):
+- A product can be linked to multiple tools
+- Create a mapping system:
+  Table: product_compatibility (product_id, tool_id)
+
+7. Inventory System:
+- Stock In / Stock Out
+- Maintain stock logs (history)
+- Auto-update stock quantity
+
+8. Advanced Filtering System (Core Feature):
+- Filter products by:
+  - Tool type
+  - Category
+  - Brand
+- When a tool is selected, show only compatible spare parts and accessories
+- Add search bar (live search)
+
+9. Reports:
+- Generate stock reports
+- Export to Excel and PDF
+- Show low stock items
+
+10. UI/UX Requirements:
+- Clean modern dashboard design
+- Sidebar navigation
+- Light theme
+- Fully responsive (mobile + desktop)
+
+11. Database Tables:
+- users
+- categories
+- tools
+- products
+- product_compatibility
+- stock_logs
+
+12. Folder Structure:
+- /config (database connection)
+- /assets (CSS, JS, images)
+- /pages (dashboard, products, tools, reports)
+- /includes (header, footer, sidebar)
+- index.php (login page)
+
+13. Security:
+- Use prepared statements (PDO/MySQLi)
+- Form validation
+- Prevent SQL injection
+
+14. Extra (Optional but Recommended):
+- Barcode system for products
+- Excel import feature
+- Notification for low stock
+
+Output Required:
+- Full database SQL schema
+- Complete project folder structure
+- All PHP files with working code
+- Clean UI design
+- Sample data for testing
+
+Make the application scalable, cleanly coded, and easy to expand in future.
