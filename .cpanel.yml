@@ -1,0 +1,7 @@
+---
+deployment:
+  tasks:
+    # 1. REMOVE 'your_cpanel_username' and replace it with your actual cPanel username
+    # 2. If your domain is pointed to a different folder (like public_html), change 'torvotools.com'
+    - export DEPLOYPATH=/home/your_cpanel_username/torvotools.com/
+    - /bin/cp -R ./* $DEPLOYPATH
