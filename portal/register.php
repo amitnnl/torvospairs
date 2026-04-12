@@ -1,6 +1,6 @@
 <?php
 require_once __DIR__ . '/config/auth.php';
-ensureB2BTables();
+
 if (customerLoggedIn()) { header('Location: dashboard.php'); exit; }
 
 $errors = [];

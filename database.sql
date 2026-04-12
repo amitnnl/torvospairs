@@ -175,3 +175,71 @@ INSERT INTO stock_logs (product_id, user_id, type, quantity, previous_stock, cur
 (11, 2, 'out', 17, 20, 3, 'Bulk issue for project'),
 (12, 1, 'in', 20, 0, 20, 'Initial stock'),
 (12, 2, 'out', 13, 20, 7, 'Issued to team members');
+
+-- ============================================
+-- TABLE: settings
+-- ============================================
+CREATE TABLE IF NOT EXISTS settings (
+    setting_key VARCHAR(100) PRIMARY KEY,
+    setting_value TEXT,
+    category ENUM('frontend', 'admin', 'system') DEFAULT 'frontend',
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB;
+
+-- Default settings
+INSERT IGNORE INTO settings (setting_key, setting_value, category) VALUES
+('site_title', 'TORVO SPAIR', 'frontend'),
+('primary_color', '#1e3a8a', 'frontend'),
+('primary_color_light', '#2563eb', 'frontend'),
+('contact_email', 'sales@torvo.com', 'frontend'),
+('contact_phone', '+91 98765 43210', 'frontend'),
+('address', '123 Industrial Area, Mumbai, India', 'frontend');
+
+-- ============================================
+-- TABLE: customers (B2B Portal)
+-- ============================================
+CREATE TABLE IF NOT EXISTS customers (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    company_name VARCHAR(150) NOT NULL,
+    contact_name VARCHAR(100) NOT NULL,
+    email VARCHAR(150) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    phone VARCHAR(20),
+    gstin VARCHAR(20),
+    address TEXT,
+    city VARCHAR(80),
+    state VARCHAR(80),
+    pin VARCHAR(10),
+    tier ENUM('standard','silver','gold') DEFAULT 'standard',
+    status ENUM('pending','active','suspended') DEFAULT 'pending',
+    notes TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ============================================
+-- TABLE: rfqs (B2B Portal Quotes)
+-- ============================================
+CREATE TABLE IF NOT EXISTS rfqs (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    customer_id INT NOT NULL DEFAULT 0,
+    rfq_number VARCHAR(30) UNIQUE,
+    status ENUM('submitted','reviewing','quoted','accepted','rejected','closed') DEFAULT 'submitted',
+    customer_notes TEXT,
+    admin_notes TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ============================================
+-- TABLE: rfq_items
+-- ============================================
+CREATE TABLE IF NOT EXISTS rfq_items (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    rfq_id INT NOT NULL DEFAULT 0,
+    product_id INT NOT NULL DEFAULT 0,
+    quantity INT NOT NULL DEFAULT 1,
+    unit_price DECIMAL(10,2) DEFAULT 0.00,
+    notes TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

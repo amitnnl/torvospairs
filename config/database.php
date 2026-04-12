@@ -121,11 +121,15 @@ if (!function_exists('formatCurrency')) {
 // Fetch Site Setting
 if (!function_exists('getSetting')) {
     function getSetting(string $key, string $default = ''): string {
-        $db = getDB();
-        $stmt = $db->prepare('SELECT setting_value FROM settings WHERE setting_key = ?');
-        $stmt->execute([$key]);
-        $val = $stmt->fetchColumn();
-        return $val !== false ? $val : $default;
+        try {
+            $db = getDB();
+            $stmt = $db->prepare('SELECT setting_value FROM settings WHERE setting_key = ?');
+            $stmt->execute([$key]);
+            $val = $stmt->fetchColumn();
+            return $val !== false ? $val : $default;
+        } catch (PDOException $e) {
+            return $default;
+        }
     }
 }
 

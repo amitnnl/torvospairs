@@ -1,6 +1,6 @@
 <?php
 require_once __DIR__ . '/config/auth.php';
-ensureB2BTables();
+
 
 // Handle add to RFQ
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['add_rfq'])) {

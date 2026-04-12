@@ -1,6 +1,6 @@
 <?php
 require_once __DIR__ . '/config/auth.php';
-ensureB2BTables();
+
 
 $db = portalDB();
 $db->exec("CREATE TABLE IF NOT EXISTS `enquiries` (`id` INT AUTO_INCREMENT PRIMARY KEY, `name` VARCHAR(100) NOT NULL, `company` VARCHAR(150), `email` VARCHAR(150) NOT NULL, `phone` VARCHAR(20), `subject` VARCHAR(200), `message` TEXT NOT NULL, `status` ENUM('new','replied','closed') DEFAULT 'new', `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");

@@ -121,11 +121,15 @@ function getPortalFlash(string $type): ?string {
 
 if (!function_exists('getSetting')) {
     function getSetting(string $key, string $default = ''): string {
-        $db = portalDB();
-        $stmt = $db->prepare('SELECT setting_value FROM settings WHERE setting_key = ?');
-        $stmt->execute([$key]);
-        $val = $stmt->fetchColumn();
-        return $val !== false ? $val : $default;
+        try {
+            $db = portalDB();
+            $stmt = $db->prepare('SELECT setting_value FROM settings WHERE setting_key = ?');
+            $stmt->execute([$key]);
+            $val = $stmt->fetchColumn();
+            return $val !== false ? $val : $default;
+        } catch (PDOException $e) {
+            return $default; // Graceful fallback if table is missing
+        }
     }
 }
 
@@ -141,50 +145,3 @@ if (!function_exists('formatCurrency')) {
     }
 }
 
-// ── Ensure B2B Tables Exist ────────────────────────────────────────────────────
-function ensureB2BTables(): void {
-    $pdo = portalDB();
-    $pdo->exec("SET FOREIGN_KEY_CHECKS = 0");
-
-    $pdo->exec("CREATE TABLE IF NOT EXISTS `customers` (
-        `id` INT AUTO_INCREMENT PRIMARY KEY,
-        `company_name` VARCHAR(150) NOT NULL,
-        `contact_name` VARCHAR(100) NOT NULL,
-        `email` VARCHAR(150) NOT NULL UNIQUE,
-        `password` VARCHAR(255) NOT NULL,
-        `phone` VARCHAR(20),
-        `gstin` VARCHAR(20),
-        `address` TEXT,
-        `city` VARCHAR(80),
-        `state` VARCHAR(80),
-        `pin` VARCHAR(10),
-        `tier` ENUM('standard','silver','gold') DEFAULT 'standard',
-        `status` ENUM('pending','active','suspended') DEFAULT 'pending',
-        `notes` TEXT,
-        `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
-
-    $pdo->exec("CREATE TABLE IF NOT EXISTS `rfqs` (
-        `id` INT AUTO_INCREMENT PRIMARY KEY,
-        `customer_id` INT NOT NULL DEFAULT 0,
-        `rfq_number` VARCHAR(30) UNIQUE,
-        `status` ENUM('submitted','reviewing','quoted','accepted','rejected','closed') DEFAULT 'submitted',
-        `customer_notes` TEXT,
-        `admin_notes` TEXT,
-        `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
-
-    $pdo->exec("CREATE TABLE IF NOT EXISTS `rfq_items` (
-        `id` INT AUTO_INCREMENT PRIMARY KEY,
-        `rfq_id` INT NOT NULL DEFAULT 0,
-        `product_id` INT NOT NULL DEFAULT 0,
-        `quantity` INT NOT NULL DEFAULT 1,
-        `unit_price` DECIMAL(10,2) DEFAULT 0.00,
-        `notes` TEXT,
-        `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
-
-    $pdo->exec("SET FOREIGN_KEY_CHECKS = 1");
-}
