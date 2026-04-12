@@ -52,7 +52,16 @@ include __DIR__ . '/includes/header.php';
                 </span>
             </div>
         </div>
-        <a href="rfqs.php" class="btn btn-outline btn-sm"><i class="fas fa-arrow-left"></i> Back to RFQs</a>
+        <div style="display:flex;gap:0.75rem;">
+            <a href="rfqs.php" class="btn btn-outline btn-sm"><i class="fas fa-arrow-left"></i> Back</a>
+            <?php 
+                $waText = "Hello TORVO SPAIR Support, I've just submitted an RFQ (" . $rfq['rfq_number'] . "). Please review it.\n\nItems: " . count($rfqItems) . "\nLink: " . APP_URL . "/portal/rfq_detail.php?id=" . $rid;
+                $waLink = "https://wa.me/" . preg_replace('/[^0-9]/', '', getSetting('contact_phone', '919876543210')) . "?text=" . urlencode($waText);
+            ?>
+            <a href="<?= $waLink ?>" target="_blank" class="btn btn-sm" style="background-color:#25d366;color:#fff;">
+                <i class="fab fa-whatsapp"></i> Share to WhatsApp
+            </a>
+        </div>
     </div>
 
     <!-- Items -->

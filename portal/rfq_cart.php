@@ -15,6 +15,42 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (isset($_SESSION['rfq_cart'][$pid])) $_SESSION['rfq_cart'][$pid]['qty'] = $qty;
         }
     }
+    
+    // Bulk Upload Handler
+    if ($action === 'bulk_upload') {
+        if (!empty($_FILES['csv_file']['tmp_name'])) {
+            $handle = fopen($_FILES['csv_file']['tmp_name'], 'r');
+            $added = 0; $failed = 0;
+            $header = true;
+            while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
+                if ($header) { $header = false; continue; } // Skip header row
+                
+                $sku = sanitize($data[0] ?? '');
+                $qty = max(1, (int)($data[1] ?? 1));
+                
+                if ($sku) {
+                    $stmt = $db->prepare("SELECT id FROM products WHERE sku = ? AND status='active' LIMIT 1");
+                    $stmt->execute([$sku]);
+                    $pid = $stmt->fetchColumn();
+                    
+                    if ($pid) {
+                        addToRFQ((int)$pid, $qty);
+                        $added++;
+                    } else {
+                        $failed++;
+                    }
+                }
+            }
+            fclose($handle);
+            
+            if ($added > 0) {
+                setPortalFlash('success', "Successfully added <strong>$added</strong> items from CSV. " . ($failed > 0 ? "$failed items were not found." : ""));
+            } else if ($failed > 0) {
+                setPortalFlash('error', "Could not add any items. $failed SKUs were not found in our system.");
+            }
+        }
+    }
+
     if ($action === 'submit') {
         requireCustomerLogin();
         if (!empty($_SESSION['rfq_cart'])) {
@@ -138,6 +174,26 @@ include __DIR__ . '/includes/header.php';
 
     <!-- Summary & Submit -->
     <div>
+        <!-- Bulk Add Card -->
+        <div class="card" style="margin-bottom:1.5rem;">
+            <div class="card-header"><div class="card-title"><i class="fas fa-file-upload"></i> Bulk Add Items</div></div>
+            <div class="card-body">
+                <p style="font-size:0.75rem;color:var(--text-light);margin-bottom:1rem;">Have a list of parts? Upload a CSV file with <strong>SKU</strong> and <strong>Quantity</strong> columns to add them all at once.</p>
+                <form method="POST" enctype="multipart/form-data" style="display:flex;flex-direction:column;gap:0.75rem;">
+                    <input type="hidden" name="action" value="bulk_upload">
+                    <div style="position:relative;border:2px dashed var(--border);border-radius:10px;padding:1.5rem;text-align:center;transition:var(--transition);" onmouseover="this.style.borderColor='var(--primary)'" onmouseout="this.style.borderColor='var(--border)'">
+                        <input type="file" name="csv_file" accept=".csv" required style="position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;">
+                        <i class="fas fa-cloud-upload-alt" style="font-size:1.5rem;color:var(--primary);margin-bottom:0.5rem;display:block;"></i>
+                        <span style="font-size:0.8rem;color:var(--text-medium);font-weight:600;">Click or Drag CSV File</span>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-sm btn-full"><i class="fas fa-plus-circle"></i> Upload & Add Items</button>
+                    <a href="data:text/csv;charset=utf-8,SKU,Quantity%0A601001,5%0A701002,12" download="torvo_bulk_rfq_template.csv" style="font-size:0.7rem;color:var(--text-light);text-align:center;text-decoration:underline;">
+                        <i class="fas fa-download"></i> Download Sample CSV
+                    </a>
+                </form>
+            </div>
+        </div>
+
         <div class="card" style="position:sticky;top:84px;">
             <div class="card-header"><div class="card-title"><i class="fas fa-file-invoice"></i> Order Summary</div></div>
             <div class="card-body">

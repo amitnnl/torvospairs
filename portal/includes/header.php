@@ -23,8 +23,46 @@ $activePage = $activePage ?? '';
             --primary-light: <?= getSetting('primary_color_light', '#2563eb') ?>;
         }
     </style>
+    
+    <!-- WhatsApp Floating Button CSS -->
+    <style>
+        .wa-float {
+            position: fixed; bottom: 30px; right: 30px;
+            width: 60px; height: 60px; border-radius: 50%;
+            background-color: #25d366; color: #fff;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 30px; box-shadow: 2px 2px 15px rgba(0,0,0,0.2);
+            z-index: 9999; transition: all 0.3s ease;
+            text-decoration: none;
+        }
+        .wa-float:hover {
+            transform: scale(1.1); background-color: #128c7e; color: #fff;
+        }
+        .wa-float .wa-tooltip {
+            position: absolute; right: 80px; background: #333; color: #fff;
+            padding: 8px 15px; border-radius: 8px; font-size: 14px;
+            white-space: nowrap; opacity: 0; visibility: hidden;
+            transition: all 0.3s ease; font-weight: 500;
+        }
+        .wa-float:hover .wa-tooltip {
+            opacity: 1; visibility: visible;
+        }
+        @keyframes pulse-wa {
+            0% { box-shadow: 0 0 0 0 rgba(37, 211, 102, 0.7); }
+            70% { box-shadow: 0 0 0 15px rgba(37, 211, 102, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(37, 211, 102, 0); }
+        }
+        .wa-float { animation: pulse-wa 2s infinite; }
+    </style>
 </head>
 <body>
+
+<!-- WhatsApp Floating Button -->
+<?php $waNumber = getSetting('contact_phone', '919876543210'); ?>
+<a href="https://wa.me/<?= preg_replace('/[^0-9]/', '', $waNumber) ?>?text=Hello%20TORVO%20SPAIR%20Support,%20I%20need%20assistance%20with%20an%20order." class="wa-float" target="_blank" rel="noopener">
+    <i class="fab fa-whatsapp"></i>
+    <span class="wa-tooltip">Direct Support</span>
+</a>
 
 <!-- Navbar -->
 <nav class="portal-nav">
