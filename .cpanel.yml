@@ -2,4 +2,5 @@
 deployment:
   tasks:
     - export DEPLOYPATH=/home/hotelsunplaza/torvotools.com/
-    - /bin/cp -R ./* $DEPLOYPATH
+    - /bin/cp -rf ./* $DEPLOYPATH
+    - /bin/cp -rf ./portal/assets/* $DEPLOYPATH/portal/assets/
