@@ -10,6 +10,12 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
+// Include live credentials if they exist (git-ignored)
+$db_config_path = __DIR__ . '/db_config.php';
+if (file_exists($db_config_path)) {
+    require_once $db_config_path;
+}
+
 if(!defined('DB_HOST')) define('DB_HOST', 'localhost');
 if(!defined('DB_USER')) define('DB_USER', 'root');
 if(!defined('DB_PASS')) define('DB_PASS', '');

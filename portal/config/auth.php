@@ -12,6 +12,12 @@ if (session_status() === PHP_SESSION_NONE) {
 
 define('PORTAL_BASE', dirname(__DIR__));
 
+// Include live credentials if they exist (git-ignored)
+$db_config_path = dirname(__DIR__, 2) . '/config/db_config.php';
+if (file_exists($db_config_path)) {
+    require_once $db_config_path;
+}
+
 // Re-use main DB config constants
 if(!defined('DB_HOST')) define('DB_HOST',    'localhost');
 if(!defined('DB_USER')) define('DB_USER',    'root');
