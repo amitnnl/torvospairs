@@ -1,25 +1,41 @@
 <?php
-echo "<h3>Path Debug</h3>";
-echo "Current File: " . __FILE__ . "<br>";
-echo "Current Dir: " . __DIR__ . "<br>";
-echo "Document Root: " . $_SERVER['DOCUMENT_ROOT'] . "<br>";
+$source = '/home/hotelsunplaza/repositories/torvospairs/portal/assets/css/portal.css';
+$destDir = '/home/hotelsunplaza/torvotools.com/portal/assets/css';
+$destFile = $destDir . '/portal.css';
 
-function findFileCaseInsensitive($dir, $fileName) {
-    if (!is_dir($dir)) return;
-    $files = scandir($dir);
-    foreach ($files as $file) {
-        if ($file === '.' || $file === '..') continue;
-        $path = $dir . '/' . $file;
-        if (strtolower($file) === strtolower($fileName)) {
-            echo "<strong>FOUND!</strong> path: " . $path . "<br>";
-        }
-        if (is_dir($path)) {
-            findFileCaseInsensitive($path, $fileName);
-        }
+echo "<h3>Manual Repair Utility</h3>";
+
+// 1. Ensure directory exists
+if (!file_exists($destDir)) {
+    echo "Creating directory: $destDir... ";
+    if (mkdir($destDir, 0755, true)) {
+        echo "SUCCESS<br>";
+    } else {
+        echo "FAILED<br>";
     }
+} else {
+    echo "Directory exists: $destDir<br>";
 }
 
-echo "<h3>Case-Insensitive Search for portal.css...</h3>";
-findFileCaseInsensitive(dirname(__DIR__, 2), 'portal.css');
-echo "Done.";
+// 2. Perform copy
+echo "Copying from $source to $destFile... ";
+if (file_exists($source)) {
+    if (copy($source, $destFile)) {
+        echo "<strong>SUCCESS!</strong><br>";
+        chmod($destFile, 0644);
+    } else {
+        $err = error_get_last();
+        echo "<strong>FAILED:</strong> " . $err['message'] . "<br>";
+    }
+} else {
+    echo "<strong>FAILED: Source file not found in repository!</strong><br>";
+}
+
+echo "<h3>Verification</h3>";
+if (file_exists($destFile)) {
+    echo "The file now exists at: " . $destFile . "<br>";
+    echo "Size: " . filesize($destFile) . " bytes<br>";
+} else {
+    echo "The file is STILL missing.<br>";
+}
 ?>
