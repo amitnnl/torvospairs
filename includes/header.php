@@ -107,7 +107,7 @@ $flashInfo    = getFlash('info');
             </a>
             <a href="<?= APP_URL ?>/pages/rfq_manager.php" class="sidebar-nav-item <?= ($activePage ?? '') === 'rfqs' ? 'active' : '' ?>">
                 <div class="nav-icon"><i class="fas fa-file-alt"></i></div>
-                RFQ Manager
+                RFQs
             </a>
             <a href="<?= APP_URL ?>/pages/customers_b2b.php" class="sidebar-nav-item <?= ($activePage ?? '') === 'customers_b2b' ? 'active' : '' ?>">
                 <div class="nav-icon"><i class="fas fa-building"></i></div>
@@ -115,15 +115,31 @@ $flashInfo    = getFlash('info');
             </a>
             <a href="<?= APP_URL ?>/pages/orders_admin.php" class="sidebar-nav-item <?= ($activePage ?? '') === 'orders_admin' ? 'active' : '' ?>">
                 <div class="nav-icon"><i class="fas fa-truck"></i></div>
-                Order Management
+                Orders
             </a>
             <a href="<?= APP_URL ?>/pages/discount_manager.php" class="sidebar-nav-item <?= ($activePage ?? '') === 'discounts' ? 'active' : '' ?>">
                 <div class="nav-icon"><i class="fas fa-tags"></i></div>
-                Pricing & Discounts
+                Discounts
             </a>
             <a href="<?= APP_URL ?>/pages/enquiries.php" class="sidebar-nav-item <?= ($activePage ?? '') === 'enquiries' ? 'active' : '' ?>">
                 <div class="nav-icon"><i class="fas fa-envelope-open"></i></div>
                 Enquiries
+            </a>
+        </div>
+
+        <div class="sidebar-section">
+            <div class="sidebar-section-title">Admin & Site</div>
+            <a href="<?= APP_URL ?>/pages/users.php" class="sidebar-nav-item <?= ($activePage ?? '') === 'users' ? 'active' : '' ?>">
+                <div class="nav-icon"><i class="fas fa-users"></i></div>
+                User Management
+            </a>
+            <a href="<?= APP_URL ?>/pages/settings.php" class="sidebar-nav-item <?= ($activePage ?? '') === 'settings' ? 'active' : '' ?>">
+                <div class="nav-icon"><i class="fas fa-cogs"></i></div>
+                Site Customization
+            </a>
+            <a href="<?= APP_URL ?>/pages/settings.php#tab-frontend" class="sidebar-nav-item">
+                <div class="nav-icon"><i class="fas fa-edit"></i></div>
+                Pages Update
             </a>
             <a href="<?= APP_URL ?>/pages/api_docs.php" class="sidebar-nav-item <?= ($activePage ?? '') === 'api_docs' ? 'active' : '' ?>">
                 <div class="nav-icon"><i class="fas fa-code"></i></div>
@@ -137,25 +153,7 @@ $flashInfo    = getFlash('info');
                 <div class="nav-icon"><i class="fas fa-external-link-alt"></i></div>
                 View Website
             </a>
-            <a href="<?= APP_URL ?>/portal/catalogue.php" target="_blank" class="sidebar-nav-item">
-                <div class="nav-icon"><i class="fas fa-store"></i></div>
-                B2B Catalogue
-            </a>
         </div>
-
-        <?php if (isAdmin()): ?>
-        <div class="sidebar-section">
-            <div class="sidebar-section-title">Admin</div>
-            <a href="<?= APP_URL ?>/pages/users.php" class="sidebar-nav-item <?= ($activePage ?? '') === 'users' ? 'active' : '' ?>">
-                <div class="nav-icon"><i class="fas fa-users"></i></div>
-                User Management
-            </a>
-            <a href="<?= APP_URL ?>/pages/settings.php" class="sidebar-nav-item <?= ($activePage ?? '') === 'settings' ? 'active' : '' ?>">
-                <div class="nav-icon"><i class="fas fa-cogs"></i></div>
-                Site Settings
-            </a>
-        </div>
-        <?php endif; ?>
 
         <div class="sidebar-section">
             <div class="sidebar-section-title">Account</div>
