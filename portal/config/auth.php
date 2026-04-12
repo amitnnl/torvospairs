@@ -19,7 +19,7 @@ if(!defined('DB_PASS')) define('DB_PASS',    '');
 if(!defined('DB_NAME')) define('DB_NAME',    'torvo_spair');
 if(!defined('APP_NAME')) define('APP_NAME',   'TORVO SPAIR');
 
-$protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
+$protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || (isset($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] == 443)) ? "https://" : "http://";
 $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
 $base_dir = (strpos($host, 'localhost') !== false || strpos($host, '127.0.0.1') !== false) ? '/torvo_spair' : '';
 $baseUrl = $protocol . $host . $base_dir;
