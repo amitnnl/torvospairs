@@ -84,6 +84,16 @@ $activePage = $activePage ?? '';
         </button>
 
         <div class="nav-links" id="mobileNav">
+            <!-- Mobile Search Bar (Only visible via CSS in small screens) -->
+            <div class="mobile-search-only" style="padding: 0 0.5rem 1rem 0.5rem; display: none;">
+                <div style="display:flex;align-items:center;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.15);border-radius:10px;padding:0.6rem 0.85rem;gap:0.75rem;">
+                    <i class="fas fa-search" style="color:rgba(255,255,255,0.6);"></i>
+                    <input type="text" placeholder="Search products..." 
+                           oninput="const s=document.getElementById('portalSearch'); s.value=this.value; s.dispatchEvent(new Event('input'));"
+                           style="background:none;border:none;outline:none;color:#fff;width:100%;font-size:0.9rem;">
+                </div>
+            </div>
+
             <a href="<?= PORTAL_URL ?>/home.php" class="nav-link <?= $activePage==='home'?'active':'' ?>">
                 <i class="fas fa-home" style="font-size:0.75rem;"></i> Home
             </a>
