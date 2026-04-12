@@ -44,13 +44,6 @@
     </div>
 </footer>
 
-<!-- WhatsApp Floating Button -->
-<a href="https://api.whatsapp.com/send?phone=<?= getSetting('whatsapp_number', '919800000000') ?>&text=Hello! I have an enquiry about <?= getSetting('site_title', 'TORVO SPAIR') ?>." target="_blank"
-   style="position:fixed;bottom:1.5rem;right:1.5rem;z-index:999;width:54px;height:54px;border-radius:50%;background:#25d366;display:flex;align-items:center;justify-content:center;color:#fff;font-size:1.5rem;box-shadow:0 4px 20px rgba(37,211,102,0.4);text-decoration:none;transition:all 0.3s;" 
-   title="Chat on WhatsApp"
-   onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform=''">
-    <i class="fab fa-whatsapp"></i>
-</a>
 
 <script>
 // Mobile Menu Toggle
