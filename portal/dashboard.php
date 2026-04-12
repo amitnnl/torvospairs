@@ -96,7 +96,7 @@ include __DIR__ . '/includes/header.php';
         </div>
     </div>
 
-    <div style="display:grid;grid-template-columns:1.5fr 1fr;gap:1.25rem;align-items:start;">
+    <div class="dash-main-grid" style="display:grid;grid-template-columns:1.5fr 1fr;gap:1.25rem;align-items:start;">
 
         <!-- Recent RFQs -->
         <div class="card">
