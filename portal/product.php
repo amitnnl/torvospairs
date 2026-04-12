@@ -148,6 +148,8 @@ include __DIR__ . '/includes/header.php';
 
             <!-- Add to RFQ -->
             <form method="POST" style="display:flex;gap:0.75rem;align-items:center;flex-wrap:wrap;">
+            <!-- Add to RFQ -->
+            <form method="POST" style="display:flex;gap:0.75rem;align-items:center;flex-wrap:wrap;">
                 <div style="display:flex;align-items:center;background:#fff;border:1px solid var(--border);border-radius:10px;overflow:hidden;">
                     <button type="button" onclick="const i=document.getElementById('qty');i.value=Math.max(1,+i.value-1)" style="width:38px;height:38px;border:none;background:none;cursor:pointer;font-size:1.1rem;color:var(--text-muted);">−</button>
                     <input type="number" name="quantity" id="qty" value="1" min="1" max="10000" style="width:60px;text-align:center;border:none;outline:none;font-size:0.95rem;font-weight:700;">
@@ -166,6 +168,104 @@ include __DIR__ . '/includes/header.php';
             </form>
         </div>
     </div>
+
+    <!-- Exploded View & Spare Parts Section -->
+    <?php
+    // Fetch diagram parts if they exist
+    $diagStmt = $db->prepare("
+        SELECT dp.*, p.name, p.sku, p.price, p.image, p.quantity 
+        FROM diagram_parts dp 
+        JOIN products p ON dp.part_product_id = p.id 
+        WHERE dp.parent_product_id = ? 
+        ORDER BY CAST(dp.number_on_diagram AS UNSIGNED) ASC
+    ");
+    $diagStmt->execute([$pid]);
+    $diagramParts = $diagStmt->fetchAll();
+    
+    // Check if this tool has an exploded view
+    $hasDiagram = !empty($p['diagram_image']) || !empty($diagramParts);
+    if ($hasDiagram):
+    ?>
+    <div class="card" style="margin-bottom:2rem;border:none;box-shadow:var(--shadow-lg);">
+        <div class="card-header" style="background:linear-gradient(90deg, var(--primary-dark), var(--primary));border:none;padding:1.5rem 2rem;">
+            <div class="card-title" style="color:#fff;font-size:1.2rem;">
+                <i class="fas fa-microchip" style="color:var(--accent);"></i> Exploded View & Spare Parts
+            </div>
+        </div>
+        <div class="card-body" style="padding:0;">
+            <div style="display:grid;grid-template-columns:1fr 350px;gap:0;">
+                
+                <!-- Interaction Diagram Area -->
+                <div style="padding:2rem;background:#fcfcfc;border-right:1px solid var(--border);">
+                    <div style="position:relative;background:#fff;border-radius:12px;padding:1rem;box-shadow:var(--shadow-sm);min-height:400px;display:flex;align-items:center;justify-content:center;">
+                        <?php if (!empty($p['diagram_image'])): ?>
+                            <img src="<?= UPLOAD_URL . htmlspecialchars($p['diagram_image']) ?>" style="max-width:100%;object-fit:contain;" id="explodedDiagram">
+                            
+                            <!-- Hotspots Overlay (CSS-only for now) -->
+                            <?php foreach ($diagramParts as $dp): ?>
+                            <div class="diagram-hotspot" 
+                                 style="position:absolute;left:<?= $dp['x_percent'] ?>%;top:<?= $dp['y_percent'] ?>%;"
+                                 title="<?= htmlspecialchars($dp['name']) ?>"
+                                 onclick="document.getElementById('part_row_<?= $dp['part_product_id'] ?>').scrollIntoView({behavior:'smooth'})">
+                                <?= $dp['number_on_diagram'] ?>
+                            </div>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <div style="text-align:center;color:var(--text-muted);">
+                                <i class="fas fa-draw-polygon" style="font-size:4rem;display:block;margin-bottom:1rem;opacity:0.2;"></i>
+                                <p>Exploded view drawing is currently being updated for this tool.</p>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+                </div>
+
+                <!-- Parts List Panel -->
+                <div style="max-height:600px;overflow-y:auto;background:#fff;">
+                    <div style="padding:1rem 1.5rem;background:var(--bg-gray);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:2;">
+                        <span style="font-size:0.75rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;">Identified Parts</span>
+                    </div>
+                    <?php if (empty($diagramParts)): ?>
+                        <div style="padding:3rem 2rem;text-align:center;color:var(--text-muted);font-size:0.875rem;">
+                            No individual parts linked yet.
+                        </div>
+                    <?php else: ?>
+                        <?php foreach ($diagramParts as $dp): ?>
+                        <div id="part_row_<?= $dp['part_product_id'] ?>" style="padding:1rem 1.5rem;border-bottom:1px solid var(--border);transition:all 0.2s;" onmouseover="this.style.background='var(--bg-gray)'" onmouseout="this.style.background='transparent'">
+                            <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.5rem;">
+                                <div style="width:24px;height:24px;background:var(--primary);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.65rem;font-weight:800;flex-shrink:0;">
+                                    <?= $dp['number_on_diagram'] ?>
+                                </div>
+                                <div style="font-weight:700;font-size:0.875rem;color:var(--text-dark);"><?= htmlspecialchars($dp['name']) ?></div>
+                            </div>
+                            <div style="display:flex;justify-content:space-between;align-items:center;">
+                                <div style="font-size:0.75rem;color:var(--text-muted);">SKU: <?= htmlspecialchars($dp['sku']) ?></div>
+                                <div style="font-weight:800;color:var(--primary);font-size:0.9rem;"><?= formatCurrency($dp['price']) ?></div>
+                            </div>
+                            <div style="margin-top:0.75rem;">
+                                <a href="product.php?id=<?= $dp['part_product_id'] ?>" class="btn btn-outline btn-sm btn-full" style="font-size:0.7rem;padding:0.4rem;">
+                                    <i class="fas fa-shopping-cart"></i> View & Add
+                                </a>
+                            </div>
+                        </div>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .diagram-hotspot {
+            background: var(--accent); color: #fff; width: 22px; height: 22px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center; font-size: 0.65rem; font-weight: 900;
+            cursor: pointer; box-shadow: 0 0 0 2px #fff, 0 4px 10px rgba(0,0,0,0.2);
+            transition: all 0.2s; border: none;
+        }
+        .diagram-hotspot:hover {
+            transform: scale(1.3); background: var(--primary-light); z-index: 10;
+        }
+    </style>
+    <?php endif; ?>
 
     <!-- Compatible Tools -->
     <?php if (!empty($compatTools)): ?>
