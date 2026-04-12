@@ -18,9 +18,15 @@ if(!defined('DB_USER')) define('DB_USER',    'root');
 if(!defined('DB_PASS')) define('DB_PASS',    '');
 if(!defined('DB_NAME')) define('DB_NAME',    'torvo_spair');
 if(!defined('APP_NAME')) define('APP_NAME',   'TORVO SPAIR');
-if(!defined('APP_URL')) define('APP_URL',    'http://localhost/torvo_spair');
-if(!defined('PORTAL_URL')) define('PORTAL_URL', 'http://localhost/torvo_spair/portal');
-if(!defined('UPLOAD_URL')) define('UPLOAD_URL', 'http://localhost/torvo_spair/assets/uploads/');
+
+$protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
+$host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+$base_dir = (strpos($host, 'localhost') !== false || strpos($host, '127.0.0.1') !== false) ? '/torvo_spair' : '';
+$baseUrl = $protocol . $host . $base_dir;
+
+if(!defined('APP_URL')) define('APP_URL',    $baseUrl);
+if(!defined('PORTAL_URL')) define('PORTAL_URL', APP_URL . '/portal');
+if(!defined('UPLOAD_URL')) define('UPLOAD_URL', APP_URL . '/assets/uploads/');
 if(!defined('UPLOAD_DIR')) define('UPLOAD_DIR', PORTAL_BASE . '/assets/uploads/');
 if(!defined('MIN_STOCK_ALERT')) define('MIN_STOCK_ALERT', 10);
 

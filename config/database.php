@@ -17,9 +17,14 @@ if(!defined('DB_NAME')) define('DB_NAME', 'torvo_spair');
 if(!defined('DB_CHARSET')) define('DB_CHARSET', 'utf8mb4');
 
 // Application Settings
+$protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
+$host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+$base_dir = (strpos($host, 'localhost') !== false || strpos($host, '127.0.0.1') !== false) ? '/torvo_spair' : '';
+$baseUrl = $protocol . $host . $base_dir;
+
 if(!defined('APP_NAME')) define('APP_NAME', 'TORVO SPAIR');
 if(!defined('APP_VERSION')) define('APP_VERSION', '1.0.0');
-if(!defined('APP_URL')) define('APP_URL', 'http://localhost/torvo_spair');
+if(!defined('APP_URL')) define('APP_URL', $baseUrl);
 if(!defined('UPLOAD_DIR')) define('UPLOAD_DIR', __DIR__ . '/../assets/uploads/');
 if(!defined('UPLOAD_URL')) define('UPLOAD_URL', APP_URL . '/assets/uploads/');
 if(!defined('MIN_STOCK_ALERT')) define('MIN_STOCK_ALERT', 10); // Global low stock threshold
