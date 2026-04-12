@@ -118,7 +118,7 @@ $activePage = $activePage ?? '';
 
         <div class="nav-right">
             <!-- Live Search -->
-            <div style="position:relative;display:none;" class="portal-search-wrap" id="portalSearchWrap">
+            <div style="position:relative;display:none;" class="portal-search-wrap hide-mobile" id="portalSearchWrap">
                 <div style="display:flex;align-items:center;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.15);border-radius:8px;padding:0.4rem 0.75rem;gap:0.5rem;">
                     <i class="fas fa-search" style="color:rgba(255,255,255,0.5);font-size:0.75rem;"></i>
                     <input type="text" id="portalSearch" placeholder="Search parts, tools..." autocomplete="off"
@@ -132,7 +132,7 @@ $activePage = $activePage ?? '';
             <!-- RFQ Cart -->
             <a href="<?= PORTAL_URL ?>/rfq_cart.php" class="nav-rfq-btn">
                 <i class="fas fa-shopping-cart"></i>
-                RFQ Cart
+                <span class="hide-mobile">RFQ Cart</span>
                 <?php if ($rfqCount > 0): ?>
                 <span class="rfq-count"><?= $rfqCount ?></span>
                 <?php endif; ?>
@@ -141,24 +141,24 @@ $activePage = $activePage ?? '';
             <?php if ($customer): ?>
             <div class="nav-user">
                 <div class="nav-user-avatar"><?= strtoupper(substr($customer['name'], 0, 1)) ?></div>
-                <div style="display:flex;flex-direction:column;line-height:1.2;">
+                <div style="display:flex;flex-direction:column;line-height:1.2;" class="hide-mobile">
                     <span style="font-size:0.8rem;font-weight:600;color:#fff;"><?= htmlspecialchars(explode(' ', $customer['name'])[0]) ?></span>
-                    <span style="font-size:0.65rem;color:rgba(255,255,255,0.5);"><?= htmlspecialchars($customer['company']) ?></span>
+                    <span style="font-size:0.65rem;color:rgba(255,255,255,0.5);"><?= htmlspecialchars($customer['company'] ?? '') ?></span>
                 </div>
                 <div style="display:flex;gap:0.25rem;">
                     <a href="<?= PORTAL_URL ?>/profile.php" class="nav-auth-btn nav-login" style="font-size:0.78rem;padding:0.4rem 0.75rem;" title="My Profile">
                         <i class="fas fa-user-cog"></i>
                     </a>
-                    <a href="<?= PORTAL_URL ?>/logout.php" class="nav-auth-btn nav-login" style="font-size:0.78rem;padding:0.4rem 0.75rem;" title="Logout">
+                    <a href="<?= PORTAL_URL ?>/logout.php" class="nav-auth-btn nav-login hide-mobile" style="font-size:0.78rem;padding:0.4rem 0.75rem;" title="Logout">
                         <i class="fas fa-sign-out-alt"></i>
                     </a>
                 </div>
             </div>
             <?php else: ?>
-            <a href="<?= PORTAL_URL ?>/index.php" class="nav-auth-btn nav-login">
+            <a href="<?= PORTAL_URL ?>/index.php" class="nav-auth-btn nav-login hide-mobile">
                 <i class="fas fa-sign-in-alt"></i> Login
             </a>
-            <a href="<?= PORTAL_URL ?>/register.php" class="nav-auth-btn nav-register">
+            <a href="<?= PORTAL_URL ?>/register.php" class="nav-auth-btn nav-register hide-mobile">
                 <i class="fas fa-building"></i> Register
             </a>
             <?php endif; ?>

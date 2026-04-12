@@ -102,7 +102,7 @@ include __DIR__ . '/includes/header.php';
 </div></div>
 
 <div class="section container">
-<div style="display:grid;grid-template-columns:1.6fr 1fr;gap:1.5rem;align-items:start;">
+<div class="cart-grid">
 
     <!-- Cart Items -->
     <div>
