@@ -69,7 +69,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $ins->execute([$rfqId, $item['product_id'], $item['qty'], $price]);
             }
             clearRFQ();
-            portalFlash('success', "RFQ <strong>$rfqNum</strong> submitted successfully! We'll get back to you within 24 hours.");
+            setPortalFlash('success', "RFQ <strong>$rfqNum</strong> submitted successfully! We'll get back to you within 24 hours.");
             header('Location: rfqs.php'); exit;
         }
     }
