@@ -32,6 +32,8 @@ $flashInfo    = getFlash('info');
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="stylesheet" href="<?= APP_URL ?>/assets/css/style.css">
+    <!-- Load Chart.js early to prevent "Chart is not defined" errors in dashboard/reports -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
             --primary: <?= getSetting('primary_color', '#2563eb') ?>;
@@ -126,6 +128,18 @@ $flashInfo    = getFlash('info');
             <a href="<?= APP_URL ?>/pages/api_docs.php" class="sidebar-nav-item <?= ($activePage ?? '') === 'api_docs' ? 'active' : '' ?>">
                 <div class="nav-icon"><i class="fas fa-code"></i></div>
                 API Docs
+            </a>
+        </div>
+
+        <div class="sidebar-section">
+            <div class="sidebar-section-title">Public Portal</div>
+            <a href="<?= APP_URL ?>/portal/home.php" target="_blank" class="sidebar-nav-item">
+                <div class="nav-icon"><i class="fas fa-external-link-alt"></i></div>
+                View Website
+            </a>
+            <a href="<?= APP_URL ?>/portal/catalogue.php" target="_blank" class="sidebar-nav-item">
+                <div class="nav-icon"><i class="fas fa-store"></i></div>
+                B2B Catalogue
             </a>
         </div>
 

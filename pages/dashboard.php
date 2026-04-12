@@ -4,11 +4,6 @@ $pageTitle = 'Dashboard';
 $pageIcon  = 'fas fa-chart-pie';
 $activePage = 'dashboard';
 include BASE_PATH . '/includes/header.php';
-?>
-<!-- Load Chart.js for dashboard analytics -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<?php
-
 $db = getDB();
 
 // ---- Key Metrics ----
