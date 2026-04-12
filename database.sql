@@ -3,9 +3,6 @@
 -- Database Schema + Sample Data
 -- ============================================
 
-CREATE DATABASE IF NOT EXISTS torvo_spair CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-USE torvo_spair;
-
 -- ============================================
 -- TABLE: users
 -- ============================================
