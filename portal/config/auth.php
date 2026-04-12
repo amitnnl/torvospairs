@@ -34,11 +34,15 @@ if(!defined('MIN_STOCK_ALERT')) define('MIN_STOCK_ALERT', 10);
 function portalDB(): PDO {
     static $pdo = null;
     if ($pdo === null) {
-        $pdo = new PDO(
-            "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=utf8mb4",
-            DB_USER, DB_PASS,
-            [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC]
-        );
+        try {
+            $pdo = new PDO(
+                "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=utf8mb4",
+                DB_USER, DB_PASS,
+                [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC]
+            );
+        } catch (PDOException $e) {
+            die("<strong>Portal Database Connection Failed:</strong><br>Please ensure you have configured your live database credentials correctly in <code>portal/config/auth.php</code>.<br><br><i>Error: " . htmlspecialchars($e->getMessage()) . "</i>");
+        }
     }
     return $pdo;
 }
