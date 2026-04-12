@@ -6,7 +6,10 @@ $activePage     = 'sales_report';
 $pageBreadcrumb = 'Sales Analytics';
 include BASE_PATH . '/includes/header.php';
 requireAdmin();
-
+?>
+<!-- Load Chart.js for analytics -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<?php
 $db = getDB();
 
 // Ensure tables
