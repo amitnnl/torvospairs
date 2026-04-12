@@ -32,6 +32,7 @@ $flashInfo    = getFlash('info');
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="stylesheet" href="<?= APP_URL ?>/assets/css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
             --primary: <?= getSetting('primary_color', '#2563eb') ?>;
@@ -45,124 +46,109 @@ $flashInfo    = getFlash('info');
 <div class="app-layout">
 <!-- ====== SIDEBAR ====== -->
 <aside class="sidebar" id="sidebar">
-    <div class="sidebar-brand">
-        <?php $dynLogo = getSetting('logo_image'); if ($dynLogo): ?>
-            <img src="<?= UPLOAD_URL . $dynLogo ?>" alt="Logo" style="height:36px;border-radius:6px;background:#fff;padding:3px;">
-        <?php else: ?>
-            <div class="brand-icon"><i class="fas fa-wrench" style="color:#fff;"></i></div>
-        <?php endif; ?>
-        <div class="brand-text">
-            <h2><?= getSetting('site_title', 'TORVO SPAIR') ?></h2>
-            <span>Inventory System</span>
-        </div>
+    <div class="sidebar-header">
+        <a href="<?= APP_URL ?>/pages/dashboard.php" class="sidebar-logo">
+            <i class="fas fa-wrench"></i>
+            <div class="logo-text">
+                <span class="logo-main"><?= getSetting('site_title', 'TORVO SPAIR') ?></span>
+                <span class="logo-sub">ADMIN B2B</span>
+            </div>
+        </a>
     </div>
 
-    <div class="sidebar-section">
-        <div class="sidebar-section-title">Main</div>
+    <div class="sidebar-menu">
         <a href="<?= APP_URL ?>/pages/dashboard.php" class="sidebar-nav-item <?= ($activePage ?? '') === 'dashboard' ? 'active' : '' ?>">
             <div class="nav-icon"><i class="fas fa-chart-pie"></i></div>
             Dashboard
         </a>
-    </div>
 
-    <div class="sidebar-section">
-        <div class="sidebar-section-title">Inventory</div>
-        <a href="<?= APP_URL ?>/pages/products.php" class="sidebar-nav-item <?= ($activePage ?? '') === 'products' ? 'active' : '' ?>">
-            <div class="nav-icon"><i class="fas fa-boxes"></i></div>
-            Products
-        </a>
-        <a href="<?= APP_URL ?>/pages/tools.php" class="sidebar-nav-item <?= ($activePage ?? '') === 'tools' ? 'active' : '' ?>">
-            <div class="nav-icon"><i class="fas fa-tools"></i></div>
-            Power Tools
-        </a>
-        <a href="<?= APP_URL ?>/pages/categories.php" class="sidebar-nav-item <?= ($activePage ?? '') === 'categories' ? 'active' : '' ?>">
-            <div class="nav-icon"><i class="fas fa-layer-group"></i></div>
-            Categories
-        </a>
-        <a href="<?= APP_URL ?>/pages/stock.php" class="sidebar-nav-item <?= ($activePage ?? '') === 'stock' ? 'active' : '' ?>">
-            <div class="nav-icon"><i class="fas fa-warehouse"></i></div>
-            Stock Management
-            <?php if ($lowStockCount > 0): ?>
-            <span class="badge"><?= $lowStockCount ?></span>
-            <?php endif; ?>
-        </a>
+        <div class="sidebar-section">
+            <div class="sidebar-section-title">Inventory</div>
+            <a href="<?= APP_URL ?>/pages/products.php" class="sidebar-nav-item <?= ($activePage ?? '') === 'products' ? 'active' : '' ?>">
+                <div class="nav-icon"><i class="fas fa-boxes"></i></div>
+                Products
+            </a>
+            <a href="<?= APP_URL ?>/pages/tools.php" class="sidebar-nav-item <?= ($activePage ?? '') === 'tools' ? 'active' : '' ?>">
+                <div class="nav-icon"><i class="fas fa-tools"></i></div>
+                Power Tools
+            </a>
+            <a href="<?= APP_URL ?>/pages/categories.php" class="sidebar-nav-item <?= ($activePage ?? '') === 'categories' ? 'active' : '' ?>">
+                <div class="nav-icon"><i class="fas fa-layer-group"></i></div>
+                Categories
+            </a>
+            <a href="<?= APP_URL ?>/pages/stock.php" class="sidebar-nav-item <?= ($activePage ?? '') === 'stock' ? 'active' : '' ?>">
+                <div class="nav-icon"><i class="fas fa-exchange-alt"></i></div>
+                Stock Management
+            </a>
+        </div>
+
         <a href="<?= APP_URL ?>/pages/compatibility.php" class="sidebar-nav-item <?= ($activePage ?? '') === 'compatibility' ? 'active' : '' ?>">
             <div class="nav-icon"><i class="fas fa-link"></i></div>
             Compatibility Map
+            <span class="nav-badge">2</span>
         </a>
-    </div>
 
-    <div class="sidebar-section">
-        <div class="sidebar-section-title">Reports & B2B</div>
-        <a href="<?= APP_URL ?>/pages/reports.php" class="sidebar-nav-item <?= ($activePage ?? '') === 'reports' ? 'active' : '' ?>">
-            <div class="nav-icon"><i class="fas fa-chart-bar"></i></div>
-            Reports
-        </a>
-        <a href="<?= APP_URL ?>/pages/sales_report.php" class="sidebar-nav-item <?= ($activePage ?? '') === 'sales_report' ? 'active' : '' ?>">
-            <div class="nav-icon"><i class="fas fa-chart-line"></i></div>
-            Sales Analytics
-        </a>
-        <a href="<?= APP_URL ?>/pages/rfq_manager.php" class="sidebar-nav-item <?= ($activePage ?? '') === 'rfqs' ? 'active' : '' ?>">
-            <div class="nav-icon"><i class="fas fa-file-alt"></i></div>
-            RFQ Manager
-        </a>
-        <a href="<?= APP_URL ?>/pages/customers_b2b.php" class="sidebar-nav-item <?= ($activePage ?? '') === 'customers_b2b' ? 'active' : '' ?>">
-            <div class="nav-icon"><i class="fas fa-building"></i></div>
-            B2B Customers
-        </a>
-        <a href="<?= APP_URL ?>/pages/orders_admin.php" class="sidebar-nav-item <?= ($activePage ?? '') === 'orders_admin' ? 'active' : '' ?>">
-            <div class="nav-icon"><i class="fas fa-truck"></i></div>
-            Order Management
-        </a>
-        <a href="<?= APP_URL ?>/pages/discount_manager.php" class="sidebar-nav-item <?= ($activePage ?? '') === 'discounts' ? 'active' : '' ?>">
-            <div class="nav-icon"><i class="fas fa-tags"></i></div>
-            Pricing & Discounts
-        </a>
-        <a href="<?= APP_URL ?>/pages/enquiries.php" class="sidebar-nav-item <?= ($activePage ?? '') === 'enquiries' ? 'active' : '' ?>">
-            <div class="nav-icon"><i class="fas fa-envelope-open"></i></div>
-            Enquiries
-        </a>
-        <a href="<?= APP_URL ?>/pages/api_docs.php" class="sidebar-nav-item <?= ($activePage ?? '') === 'api_docs' ? 'active' : '' ?>">
-            <div class="nav-icon"><i class="fas fa-code"></i></div>
-            API Docs
-        </a>
-    </div>
+        <div class="sidebar-section">
+            <div class="sidebar-section-title">Reports & B2B</div>
+            <a href="<?= APP_URL ?>/pages/reports.php" class="sidebar-nav-item <?= ($activePage ?? '') === 'reports' ? 'active' : '' ?>">
+                <div class="nav-icon"><i class="fas fa-chart-bar"></i></div>
+                Reports
+            </a>
+            <a href="<?= APP_URL ?>/pages/sales_report.php" class="sidebar-nav-item <?= ($activePage ?? '') === 'sales_report' ? 'active' : '' ?>">
+                <div class="nav-icon"><i class="fas fa-chart-line"></i></div>
+                Sales Analytics
+            </a>
+            <a href="<?= APP_URL ?>/pages/rfq_manager.php" class="sidebar-nav-item <?= ($activePage ?? '') === 'rfqs' ? 'active' : '' ?>">
+                <div class="nav-icon"><i class="fas fa-file-alt"></i></div>
+                RFQ Manager
+            </a>
+            <a href="<?= APP_URL ?>/pages/customers_b2b.php" class="sidebar-nav-item <?= ($activePage ?? '') === 'customers_b2b' ? 'active' : '' ?>">
+                <div class="nav-icon"><i class="fas fa-building"></i></div>
+                B2B Customers
+            </a>
+            <a href="<?= APP_URL ?>/pages/orders_admin.php" class="sidebar-nav-item <?= ($activePage ?? '') === 'orders' ? 'active' : '' ?>">
+                <div class="nav-icon"><i class="fas fa-truck"></i></div>
+                Order Management
+            </a>
+            <a href="<?= APP_URL ?>/pages/discount_manager.php" class="sidebar-nav-item <?= ($activePage ?? '') === 'discounts' ? 'active' : '' ?>">
+                <div class="nav-icon"><i class="fas fa-tags"></i></div>
+                Pricing & Discounts
+            </a>
+            <a href="<?= APP_URL ?>/pages/enquiries.php" class="sidebar-nav-item <?= ($activePage ?? '') === 'enquiries' ? 'active' : '' ?>">
+                <div class="nav-icon"><i class="fas fa-envelope-open"></i></div>
+                Enquiries
+            </a>
+            <a href="<?= APP_URL ?>/pages/api_docs.php" class="sidebar-nav-item <?= ($activePage ?? '') === 'api_docs' ? 'active' : '' ?>">
+                <div class="nav-icon"><i class="fas fa-code"></i></div>
+                API Docs
+            </a>
+        </div>
 
-    <?php if (isAdmin()): ?>
-    <div class="sidebar-section">
-        <div class="sidebar-section-title">Admin</div>
-        <a href="<?= APP_URL ?>/pages/users.php" class="sidebar-nav-item <?= ($activePage ?? '') === 'users' ? 'active' : '' ?>">
-            <div class="nav-icon"><i class="fas fa-users"></i></div>
-            User Management
-        </a>
-        <a href="<?= APP_URL ?>/pages/settings.php" class="sidebar-nav-item <?= ($activePage ?? '') === 'settings' ? 'active' : '' ?>">
-            <div class="nav-icon"><i class="fas fa-cogs"></i></div>
-            Site Settings
-        </a>
-    </div>
-    <?php endif; ?>
-
-    <div class="sidebar-section">
-        <div class="sidebar-section-title">Account</div>
-        <a href="<?= APP_URL ?>/pages/profile.php" class="sidebar-nav-item <?= ($activePage ?? '') === 'profile' ? 'active' : '' ?>">
-            <div class="nav-icon"><i class="fas fa-user-circle"></i></div>
-            My Profile
-        </a>
+        <div class="sidebar-section">
+            <div class="sidebar-section-title">Admin</div>
+            <a href="<?= APP_URL ?>/pages/users.php" class="sidebar-nav-item <?= ($activePage ?? '') === 'users' ? 'active' : '' ?>">
+                <div class="nav-icon"><i class="fas fa-users"></i></div>
+                User Management
+            </a>
+            <a href="<?= APP_URL ?>/pages/settings.php" class="sidebar-nav-item <?= ($activePage ?? '') === 'settings' ? 'active' : '' ?>">
+                <div class="nav-icon"><i class="fas fa-cogs"></i></div>
+                Site Settings
+            </a>
+        </div>
+        
+        <div style="height:20px;"></div>
     </div>
 
     <div class="sidebar-footer">
-        <div class="sidebar-user">
-            <a href="<?= APP_URL ?>/pages/profile.php" style="display:flex;align-items:center;gap:0.75rem;flex:1;text-decoration:none;min-width:0;">
-                <div class="user-avatar"><?= $initials ?></div>
-                <div class="user-info">
-                    <div class="uname"><?= htmlspecialchars($user['name']) ?></div>
-                    <div class="urole"><?= htmlspecialchars($user['role']) ?></div>
-                </div>
-            </a>
-            <a href="<?= APP_URL ?>/pages/logout.php" class="logout-btn" data-tooltip="Sign Out">
-                <i class="fas fa-sign-out-alt"></i>
-            </a>
-        </div>
+        <div class="sidebar-section-title" style="margin-left:0; margin-bottom:10px;">Account</div>
+        <a href="<?= APP_URL ?>/pages/profile.php" class="profile-card">
+            <div class="profile-avatar">S</div>
+            <div class="profile-info">
+                <span class="profile-name">Super Admin</span>
+                <span class="profile-role">admin</span>
+            </div>
+            <i class="fas fa-chevron-right" style="font-size:0.75rem; opacity:0.5;"></i>
+        </a>
     </div>
 </aside>
 
