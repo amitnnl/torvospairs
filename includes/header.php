@@ -150,12 +150,15 @@ $flashInfo    = getFlash('info');
     <div class="sidebar-footer">
         <div class="sidebar-section-title" style="margin-left:0; margin-bottom:10px;">Account</div>
         <a href="<?= APP_URL ?>/pages/profile.php" class="profile-card">
-            <div class="profile-avatar">S</div>
+            <div class="profile-avatar"><?= $initials ?></div>
             <div class="profile-info">
-                <span class="profile-name">Super Admin</span>
-                <span class="profile-role">admin</span>
+                <span class="profile-name"><?= htmlspecialchars($user['name']) ?></span>
+                <span class="profile-role"><?= htmlspecialchars($user['role']) ?></span>
             </div>
-            <i class="fas fa-chevron-right" style="font-size:0.75rem; opacity:0.5;"></i>
+        </a>
+        <a href="<?= APP_URL ?>/logout.php" class="sidebar-nav-item" style="margin-top:10px; color:var(--danger);">
+            <div class="nav-icon"><i class="fas fa-sign-out-alt"></i></div>
+            Logout
         </a>
     </div>
 </aside>
