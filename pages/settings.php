@@ -29,10 +29,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
     
     // Process all other flat POST vars corresponding to settings
-    $stmt = $db->prepare("UPDATE settings SET setting_value=? WHERE setting_key=?");
+    $stmt = $db->prepare("INSERT INTO settings (setting_key, setting_value) VALUES (?, ?) ON DUPLICATE KEY UPDATE setting_value = VALUES(setting_value)");
     foreach ($_POST as $k => $v) {
-        if ($k === 'action' || empty($k)) continue;
-        $stmt->execute([sanitize($v), $k]);
+        if ($k === 'action' || empty($k) || $k === 'logo_image' || str_starts_with($k, 'hero_slide_')) continue;
+        $stmt->execute([$k, sanitize($v)]);
     }
     
     setFlash('success', 'Settings updated successfully.');

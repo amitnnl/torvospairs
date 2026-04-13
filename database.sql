@@ -189,11 +189,15 @@ CREATE TABLE IF NOT EXISTS settings (
 -- Default settings
 INSERT IGNORE INTO settings (setting_key, setting_value, category) VALUES
 ('site_title', 'TORVO SPAIR', 'frontend'),
+('b2b_subtitle', 'B2B PORTAL', 'frontend'),
 ('primary_color', '#1e3a8a', 'frontend'),
 ('primary_color_light', '#2563eb', 'frontend'),
 ('contact_email', 'sales@torvo.com', 'frontend'),
 ('contact_phone', '+91 98765 43210', 'frontend'),
-('address', '123 Industrial Area, Mumbai, India', 'frontend');
+('whatsapp_number', '919876543210', 'frontend'),
+('contact_address', '123 Industrial Area, Mumbai, India', 'frontend'),
+('hero_title', 'Quality Power Tool Spare Parts', 'frontend'),
+('hero_subtitle', 'Your trusted B2B partner for Power Tool Spare Parts & Accessories. Get live stock updates and instant RFQs.', 'frontend');
 
 -- ============================================
 -- TABLE: customers (B2B Portal)

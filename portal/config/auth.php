@@ -33,7 +33,7 @@ $baseUrl = $protocol . $host . $base_dir;
 if(!defined('APP_URL')) define('APP_URL',    $baseUrl);
 if(!defined('PORTAL_URL')) define('PORTAL_URL', APP_URL . '/portal');
 if(!defined('UPLOAD_URL')) define('UPLOAD_URL', APP_URL . '/assets/uploads/');
-if(!defined('UPLOAD_DIR')) define('UPLOAD_DIR', PORTAL_BASE . '/assets/uploads/');
+if(!defined('UPLOAD_DIR')) define('UPLOAD_DIR', dirname(PORTAL_BASE) . '/assets/uploads/');
 if(!defined('MIN_STOCK_ALERT')) define('MIN_STOCK_ALERT', 10);
 
 // PDO singleton

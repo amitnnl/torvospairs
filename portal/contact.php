@@ -46,11 +46,17 @@ include __DIR__ . '/includes/header.php';
             <div class="card" style="margin-bottom:1rem;">
                 <div class="card-body">
                     <h3 style="font-size:1rem;font-weight:800;color:var(--text-dark);margin-bottom:1.25rem;">Contact Information</h3>
-                    <?php foreach ([
-                        ['fas fa-phone',         '+91 98000 00000',    'tel:+919800000000',        '#16a34a'],
-                        ['fas fa-envelope',      'sales@torvo.com',    'mailto:sales@torvo.com',   '#2563eb'],
-                        ['fab fa-whatsapp',      'WhatsApp Us',        'https://api.whatsapp.com/send?phone=919800000000','#25d366'],
-                        ['fas fa-map-marker-alt','Mumbai, Maharashtra','#',                         '#f97316'],
+                    <?php 
+                    $phone = getSetting('contact_phone', '+91 98000 00000');
+                    $email = getSetting('contact_email', 'sales@torvo.com');
+                    $whatsapp = getSetting('whatsapp_number', '919800000000');
+                    $address = getSetting('contact_address', 'Mumbai, Maharashtra');
+                    
+                    foreach ([
+                        ['fas fa-phone',         $phone,    'tel:' . preg_replace('/[^0-9+]/', '', $phone),    '#16a34a'],
+                        ['fas fa-envelope',      $email,    'mailto:' . $email,   '#2563eb'],
+                        ['fab fa-whatsapp',      'WhatsApp Us',        'https://api.whatsapp.com/send?phone=' . $whatsapp, '#25d366'],
+                        ['fas fa-map-marker-alt',$address,  '#',                         '#f97316'],
                         ['fas fa-clock',         'Mon–Sat, 9am–6pm',  '#',                         '#6366f1'],
                     ] as [$icon, $text, $href, $color]): ?>
                     <a href="<?= $href ?>" target="<?= str_starts_with($href,'http')?'_blank':'_self' ?>" style="display:flex;align-items:center;gap:0.85rem;padding:0.75rem 0;border-bottom:1px solid var(--border);text-decoration:none;color:var(--text-medium);" onmouseover="this.style.color='var(--primary)'" onmouseout="this.style.color='var(--text-medium)'">
@@ -68,7 +74,7 @@ include __DIR__ . '/includes/header.php';
                 <i class="fab fa-whatsapp" style="font-size:2rem;color:#fff;margin-bottom:0.75rem;display:block;"></i>
                 <div style="font-weight:800;color:#fff;margin-bottom:0.3rem;">Quick Response</div>
                 <div style="font-size:0.8rem;color:rgba(255,255,255,0.75);margin-bottom:1rem;">Get answers faster via WhatsApp</div>
-                <a href="https://api.whatsapp.com/send?phone=919800000000&text=Hello! I have an enquiry about TORVO SPAIR spare parts." target="_blank" style="background:#fff;color:#128c7e;font-weight:800;padding:0.6rem 1.5rem;border-radius:8px;font-size:0.875rem;text-decoration:none;display:inline-flex;align-items:center;gap:0.5rem;">
+                <a href="https://api.whatsapp.com/send?phone=<?= $whatsapp ?>&text=Hello! I have an enquiry about <?= urlencode(getSetting('site_title', 'TORVO SPAIR')) ?> spare parts." target="_blank" style="background:#fff;color:#128c7e;font-weight:800;padding:0.6rem 1.5rem;border-radius:8px;font-size:0.875rem;text-decoration:none;display:inline-flex;align-items:center;gap:0.5rem;">
                     <i class="fab fa-whatsapp"></i> Start Chat
                 </a>
             </div>
