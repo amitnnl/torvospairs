@@ -113,7 +113,15 @@ if (isset($_POST['repair_db'])) {
         `created_at` timestamp NOT NULL DEFAULT current_timestamp()
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
 
-    setFlash('success', 'Database schema repaired successfully!');
+    // Add missing columns to customers if they don't exist
+    try {
+        $db->exec("ALTER TABLE customers ADD COLUMN IF NOT EXISTS status ENUM('pending','active','suspended') DEFAULT 'pending'");
+        $db->exec("ALTER TABLE customers ADD COLUMN IF NOT EXISTS tier ENUM('standard','silver','gold') DEFAULT 'standard'");
+        $db->exec("ALTER TABLE customers ADD COLUMN IF NOT EXISTS approved_at DATETIME DEFAULT NULL");
+        $db->exec("ALTER TABLE customers ADD COLUMN IF NOT EXISTS approved_by INT DEFAULT NULL");
+    } catch (Exception $e) { /* Some SQL versions don't support ADD COLUMN IF NOT EXISTS, ignore if already exists */ }
+
+    setFlash('success', 'Database schema repaired and columns synced successfully!');
     header("Location: system_check.php"); exit;
 }
 
@@ -163,10 +171,22 @@ $missing = [];
 foreach ($requiredTables as $t) {
     if (!$db->query("SHOW TABLES LIKE '$t'")->fetch()) $missing[] = $t;
 }
-if (empty($missing)) {
-    $checks[] = ['label' => 'Database Schema', 'status' => 'success', 'msg' => 'All critical tables exist.'];
+
+// Check for missing columns in customers
+$missingCols = [];
+if (!in_array('customers', $missing)) {
+    $cols = $db->query("SHOW COLUMNS FROM customers")->fetchAll(PDO::FETCH_COLUMN);
+    if (!in_array('status', $cols)) $missingCols[] = 'status';
+    if (!in_array('tier', $cols)) $missingCols[] = 'tier';
+}
+
+if (empty($missing) && empty($missingCols)) {
+    $checks[] = ['label' => 'Database Schema', 'status' => 'success', 'msg' => 'All critical tables and columns exist.'];
 } else {
-    $checks[] = ['label' => 'Database Schema', 'status' => 'danger', 'msg' => 'Missing tables: ' . implode(', ', $missing)];
+    $msg = '';
+    if (!empty($missing)) $msg .= 'Missing tables: ' . implode(', ', $missing) . '. ';
+    if (!empty($missingCols)) $msg .= 'Missing columns in customers: ' . implode(', ', $missingCols) . '.';
+    $checks[] = ['label' => 'Database Schema', 'status' => 'danger', 'msg' => $msg ?: 'Schema error.'];
 }
 
 ?>
