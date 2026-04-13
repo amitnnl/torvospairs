@@ -113,13 +113,21 @@ if (isset($_POST['repair_db'])) {
         `created_at` timestamp NOT NULL DEFAULT current_timestamp()
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
 
-    // Add missing columns to customers if they don't exist
-    try {
-        $db->exec("ALTER TABLE customers ADD COLUMN IF NOT EXISTS status ENUM('pending','active','suspended') DEFAULT 'pending'");
-        $db->exec("ALTER TABLE customers ADD COLUMN IF NOT EXISTS tier ENUM('standard','silver','gold') DEFAULT 'standard'");
-        $db->exec("ALTER TABLE customers ADD COLUMN IF NOT EXISTS approved_at DATETIME DEFAULT NULL");
-        $db->exec("ALTER TABLE customers ADD COLUMN IF NOT EXISTS approved_by INT DEFAULT NULL");
-    } catch (Exception $e) { /* Some SQL versions don't support ADD COLUMN IF NOT EXISTS, ignore if already exists */ }
+    // Add missing columns to customers with wide compatibility
+    $cols = $db->query("SHOW COLUMNS FROM customers")->fetchAll(PDO::FETCH_COLUMN);
+    
+    if (!in_array('status', $cols)) {
+        $db->exec("ALTER TABLE customers ADD COLUMN status ENUM('pending','active','suspended') DEFAULT 'pending'");
+    }
+    if (!in_array('tier', $cols)) {
+        $db->exec("ALTER TABLE customers ADD COLUMN tier ENUM('standard','silver','gold') DEFAULT 'standard'");
+    }
+    if (!in_array('approved_at', $cols)) {
+        $db->exec("ALTER TABLE customers ADD COLUMN approved_at DATETIME DEFAULT NULL");
+    }
+    if (!in_array('approved_by', $cols)) {
+        $db->exec("ALTER TABLE customers ADD COLUMN approved_by INT DEFAULT NULL");
+    }
 
     setFlash('success', 'Database schema repaired and columns synced successfully!');
     header("Location: system_check.php"); exit;
