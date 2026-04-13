@@ -1,9 +1,10 @@
 <?php
 require_once __DIR__ . '/../config/auth.php';
 
-$customer = customerLoggedIn() ? currentCustomer() : null;
-$rfqCount = rfqCount();
-$activePage = $activePage ?? '';
+$customer    = customerLoggedIn() ? currentCustomer() : null;
+$rfqCount    = rfqCount();
+$activePage  = $activePage ?? '';
+$notifCount  = unreadNotificationCount();
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -166,7 +167,15 @@ $activePage = $activePage ?? '';
                 <?php endif; ?>
             </a>
 
-            <!-- Desktop-only auth/user controls -->
+            <!-- Notification Bell -->
+            <?php if ($customer && $notifCount > 0): ?>
+            <a href="<?= PORTAL_URL ?>/dashboard.php" style="position:relative;display:flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:10px;background:rgba(124,58,237,0.15);color:#a78bfa;text-decoration:none;transition:all 0.2s;" title="<?= $notifCount ?> unread notification(s)">
+                <i class="fas fa-bell"></i>
+                <span style="position:absolute;top:4px;right:4px;background:#7c3aed;color:#fff;font-size:0.6rem;font-weight:800;min-width:16px;height:16px;border-radius:8px;display:flex;align-items:center;justify-content:center;padding:0 3px;"><?= $notifCount ?></span>
+            </a>
+            <?php endif; ?>
+
+
             <?php if ($customer): ?>
             <div class="nav-user desktop-only">
                 <div class="nav-user-avatar"><?= strtoupper(substr($customer['name'], 0, 1)) ?></div>

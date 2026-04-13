@@ -86,10 +86,9 @@ if (!empty($rfqCart)) {
     foreach ($rows as $r) $cartProducts[$r['id']] = $r;
 }
 
-$subtotal = 0;
-foreach ($rfqCart as $pid => $item) {
-    $subtotal += ($cartProducts[$pid]['price'] ?? 0) * $item['qty'];
-}
+$totalQty = array_sum(array_column($rfqCart, 'qty'));
+$customer = customerLoggedIn() ? currentCustomer() : null;
+
 
 $pageTitle  = 'RFQ Cart';
 $activePage = '';
@@ -142,14 +141,11 @@ include __DIR__ . '/includes/header.php';
                             <!-- Qty -->
                             <div class="qty-input">
                                 <button type="button" class="qty-btn" onclick="changeQty(<?= $pid ?>, -1)">−</button>
-                                <input type="number" name="qty[<?= $pid ?>]" id="qty_<?= $pid ?>" value="<?= $item['qty'] ?>" min="1" class="qty-num" onchange="updateSubtotal(<?= $pid ?>, <?= $p['price'] ?>)">
+                                <input type="number" name="qty[<?= $pid ?>]" id="qty_<?= $pid ?>" value="<?= $item['qty'] ?>" min="1" class="qty-num">
                                 <button type="button" class="qty-btn" onclick="changeQty(<?= $pid ?>, 1)">+</button>
                             </div>
-                            <div style="font-size:0.85rem;color:var(--text-light);">
-                                <?= formatCurrency($p['price']) ?> / unit
-                            </div>
-                            <div style="font-weight:700;color:var(--primary);font-size:0.95rem;" id="total_<?= $pid ?>">
-                                <?= formatCurrency($itemTotal) ?>
+                            <div style="font-size:0.8rem;color:var(--text-muted);">
+                                <i class="fas fa-lock" style="font-size:0.65rem;"></i> Price on quotation
                             </div>
                         </div>
                     </div>
@@ -197,38 +193,36 @@ include __DIR__ . '/includes/header.php';
         <div class="card" style="position:sticky;top:84px;">
             <div class="card-header"><div class="card-title"><i class="fas fa-file-invoice"></i> Order Summary</div></div>
             <div class="card-body">
-                <div style="display:flex;justify-content:space-between;margin-bottom:0.6rem;font-size:0.875rem;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.6rem;font-size:0.875rem;">
                     <span style="color:var(--text-light);">Items</span>
                     <span><?= count($rfqCart) ?></span>
                 </div>
-                <div style="display:flex;justify-content:space-between;margin-bottom:0.6rem;font-size:0.875rem;">
-                    <span style="color:var(--text-light);">Indicative Total</span>
-                    <span id="grandTotal" style="font-weight:700;color:var(--primary);"><?= formatCurrency($subtotal) ?></span>
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.6rem;font-size:0.875rem;">
+                    <span style="color:var(--text-light);">Total Units</span>
+                    <span style="font-weight:700;color:var(--primary);"><?= $totalQty ?></span>
                 </div>
                 <div style="background:rgba(37,99,235,0.06);border:1px solid rgba(37,99,235,0.15);border-radius:8px;padding:0.75rem;font-size:0.78rem;color:var(--text-medium);margin:1rem 0;">
-                    <i class="fas fa-info-circle" style="color:var(--primary);"></i>
-                    Prices shown are indicative. Final pricing will be confirmed in our quotation.
+                    <i class="fas fa-lock" style="color:var(--primary);"></i>
+                    Prices are set by admin after review. Submit your demand list to receive a quotation.
                 </div>
 
                 <?php if (!empty($rfqCart)): ?>
-                <?php if (customerLoggedIn()): ?>
-                <form method="POST">
-                    <input type="hidden" name="action" value="submit">
-                    <div class="form-group">
-                        <label class="form-label">Additional Notes / Requirements</label>
-                        <textarea name="notes" class="form-control" rows="3"
-                            placeholder="Delivery timeline, special requirements, delivery location..."></textarea>
-                    </div>
-                    <button type="submit" class="btn btn-accent btn-full btn-lg">
-                        <i class="fas fa-paper-plane"></i> Submit RFQ
-                    </button>
-                </form>
-                <?php else: ?>
+                <?php if (!$customer): ?>
                 <div style="text-align:center;padding:0.5rem 0;">
-                    <p style="font-size:0.82rem;color:var(--text-light);margin-bottom:1rem;">Login to submit your RFQ</p>
+                    <p style="font-size:0.82rem;color:var(--text-light);margin-bottom:1rem;">Login to submit your demand list</p>
                     <a href="index.php?redirect=1" class="btn btn-primary btn-full"><i class="fas fa-sign-in-alt"></i> Login to Submit</a>
                     <a href="register.php" class="btn btn-outline btn-full" style="margin-top:0.5rem;"><i class="fas fa-building"></i> Register as Partner</a>
                 </div>
+                <?php elseif (($customer['status'] ?? '') === 'pending'): ?>
+                <div style="background:rgba(217,119,6,0.08);border:1px solid rgba(217,119,6,0.2);border-radius:8px;padding:0.85rem;text-align:center;">
+                    <i class="fas fa-hourglass-half" style="color:var(--warning);font-size:1.1rem;margin-bottom:0.35rem;display:block;"></i>
+                    <strong style="font-size:0.85rem;">Account Pending Approval</strong>
+                    <p style="font-size:0.78rem;color:var(--text-muted);margin-top:0.25rem;">You can submit RFQs once admin approves your account.</p>
+                </div>
+                <?php else: ?>
+                <a href="rfq_submit.php" class="btn btn-accent btn-full btn-lg">
+                    <i class="fas fa-paper-plane"></i> Submit Demand List
+                </a>
                 <?php endif; ?>
                 <?php endif; ?>
             </div>

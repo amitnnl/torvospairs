@@ -410,7 +410,36 @@ button { cursor: pointer; font-family: inherit; }
 .btn-sm  { padding: 0.4rem 0.9rem; font-size: 0.8rem; }
 .btn-lg  { padding: 0.9rem 2rem; font-size: 1rem; }
 .btn-full { width: 100%; justify-content: center; }
-.btn-danger { background: var(--danger); color: #fff; }
+.btn-danger  { background: var(--danger); color: #fff; }
+.btn-success { background: var(--success); color: #fff; }
+.btn-success:hover { background: #15803d; transform: translateY(-1px); }
+
+/* ── Status Badges ──────────────────────────────────── */
+.status-badge {
+    display: inline-flex; align-items: center; gap: 0.3rem;
+    padding: 3px 10px; border-radius: 20px;
+    font-size: 0.72rem; font-weight: 700;
+}
+.status-submitted  { background:rgba(37,99,235,0.1);  color:var(--primary); }
+.status-reviewing  { background:rgba(217,119,6,0.1);  color:var(--warning); }
+.status-quoted     { background:rgba(124,58,237,0.12); color:#7c3aed; }
+.status-accepted   { background:rgba(22,163,74,0.1);  color:var(--success); }
+.status-invoiced   { background:rgba(22,163,74,0.12); color:var(--success); }
+.status-rejected   { background:rgba(220,38,38,0.1);  color:var(--danger); }
+.status-closed     { background:rgba(100,116,139,0.1);color:var(--text-muted); }
+
+/* ── Portal Table ───────────────────────────────────── */
+.portal-table { width:100%; border-collapse:collapse; font-size:0.875rem; }
+.portal-table th { padding:0.7rem 1rem; text-align:left; font-size:0.72rem; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; color:var(--text-light); border-bottom:1px solid var(--border); background:var(--bg-gray); }
+.portal-table td { padding:0.85rem 1rem; border-bottom:1px solid var(--border); color:var(--text-dark); }
+.portal-table tr:last-child td { border-bottom:none; }
+.portal-table tr:hover td { background:var(--bg-gray); }
+
+/* ── Breadcrumb ─────────────────────────────────────── */
+.breadcrumb { background:#fff; border-bottom:1px solid var(--border); padding:0.65rem var(--section-px); font-size:0.8rem; }
+.breadcrumb-inner { max-width:var(--content-max); margin:0 auto; display:flex; align-items:center; gap:0.5rem; color:var(--text-muted); flex-wrap:wrap; }
+.breadcrumb-inner a { color:var(--primary); text-decoration:none; }
+
 
 /* ── Cards ──────────────────────────────────────────── */
 .card { background: #fff; border: 1px solid var(--border); border-radius: var(--radius-md); box-shadow: var(--shadow-sm); overflow: hidden; }
