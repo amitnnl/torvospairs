@@ -3,7 +3,10 @@
  * Admin — Partner Applications
  * Approve / Reject pending B2B customer registrations
  */
-require_once __DIR__ . '/../includes/auth.php';
+define('BASE_PATH', dirname(__DIR__));
+$pageTitle = 'Partner Applications';
+$activePage = 'partner_applications';
+include BASE_PATH . '/includes/header.php';
 requireAdmin();
 
 $db = getDB();
@@ -16,12 +19,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($cid && $action === 'approve') {
         $db->prepare("UPDATE customers SET status='active', approved_at=NOW(), approved_by=?, rejection_reason=NULL WHERE id=?")
-           ->execute([$_SESSION['user_id'], $cid]);
-        // Send in-portal notification (if notifications table exists)
+           ->execute([$user['id'], $cid]);
+        // Send in-portal notification
         try {
             $db->prepare("INSERT INTO notifications (customer_id, type, title, message) VALUES (?, 'general', 'Account Approved!', 'Congratulations! Your TORVO SPAIR partner account has been approved. You can now submit RFQs and receive quotations.')")
                ->execute([$cid]);
-        } catch (PDOException $e) { /* ignore if table missing */ }
+        } catch (PDOException $e) { }
         setFlash('success', 'Partner account approved successfully.');
     } elseif ($cid && $action === 'reject') {
         $db->prepare("UPDATE customers SET status='suspended', rejection_reason=? WHERE id=?")
@@ -29,7 +32,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         try {
             $db->prepare("INSERT INTO notifications (customer_id, type, title, message) VALUES (?, 'general', 'Application Update', 'Your partner application was not approved at this time. Please contact us for more information.')")
                ->execute([$cid]);
-        } catch (PDOException $e) { /* ignore */ }
+        } catch (PDOException $e) { }
         setFlash('error', 'Partner application rejected.');
     }
     header('Location: partner_applications.php'); exit;
@@ -45,9 +48,6 @@ $where  = match($tab) {
 
 $customers = $db->query("SELECT * FROM customers WHERE $where ORDER BY created_at DESC")->fetchAll();
 $counts    = $db->query("SELECT status, COUNT(*) cnt FROM customers GROUP BY status")->fetchAll(PDO::FETCH_KEY_PAIR);
-
-$pageTitle = 'Partner Applications';
-include __DIR__ . '/../includes/header.php';
 ?>
 
 <div class="page-header">

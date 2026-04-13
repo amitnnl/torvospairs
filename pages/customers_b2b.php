@@ -1,9 +1,9 @@
 <?php
 define('BASE_PATH', dirname(__DIR__));
-$pageTitle      = 'B2B Customers';
-$pageIcon       = 'fas fa-building';
+$pageTitle      = 'Partner Management';
+$pageIcon       = 'fas fa-handshake';
 $activePage     = 'customers_b2b';
-$pageBreadcrumb = 'B2B Customers';
+$pageBreadcrumb = 'Partner Management';
 include BASE_PATH . '/includes/header.php';
 requireAdmin();
 

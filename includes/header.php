@@ -102,13 +102,13 @@ $flashInfo    = getFlash('info');
                 <?php if ($newRFQs > 0): ?><span class="nav-badge" style="background:var(--danger);"><?= $newRFQs ?></span><?php endif; ?>
             </a>
             <a href="<?= APP_URL ?>/pages/partner_applications.php" class="sidebar-nav-item <?= ($activePage ?? '') === 'partner_applications' ? 'active' : '' ?>">
-                <div class="nav-icon"><i class="fas fa-handshake"></i></div>
-                Partner Applications
+                <div class="nav-icon"><i class="fas fa-user-plus"></i></div>
+                New Applications
                 <?php if ($pendingPartners > 0): ?><span class="nav-badge" style="background:var(--warning);color:#000;"><?= $pendingPartners ?></span><?php endif; ?>
             </a>
             <a href="<?= APP_URL ?>/pages/customers_b2b.php" class="sidebar-nav-item <?= ($activePage ?? '') === 'customers_b2b' ? 'active' : '' ?>">
-                <div class="nav-icon"><i class="fas fa-building"></i></div>
-                B2B Customers
+                <div class="nav-icon"><i class="fas fa-handshake"></i></div>
+                Partner Management
             </a>
             <a href="<?= APP_URL ?>/pages/orders_admin.php" class="sidebar-nav-item <?= ($activePage ?? '') === 'orders' ? 'active' : '' ?>">
                 <div class="nav-icon"><i class="fas fa-truck"></i></div>

@@ -103,20 +103,24 @@ $monthlyData = $db->query("
     </div>
 </div>
 
-<!-- ---- B2B Portal Stats ---- -->
-<div class="card" style="margin-bottom:1.25rem;border-top:3px solid var(--primary);overflow:hidden;">
-    <div class="card-header" style="background:linear-gradient(135deg,rgba(37,99,235,0.05),rgba(99,102,241,0.05));">
-        <div class="card-title"><i class="fas fa-store" style="color:var(--primary);"></i> B2B Portal Activity</div>
-        <a href="<?= APP_URL ?>/portal/home.php" target="_blank" style="font-size:0.78rem;color:var(--primary);display:flex;align-items:center;gap:0.3rem;">
-            <i class="fas fa-external-link-alt"></i> Open Portal
-        </a>
+<!-- ---- B2B PARTNER HUB ---- -->
+<div class="card" style="margin-bottom:1.25rem;border-top:3px solid #7c3aed;overflow:hidden;box-shadow:var(--shadow-md);">
+    <div class="card-header" style="background:linear-gradient(135deg,rgba(124,58,237,0.05),rgba(37,99,235,0.05));">
+        <div class="card-title"><i class="fas fa-handshake" style="color:#7c3aed;"></i> B2B PARTNER HUB</div>
+        <div style="display:flex;gap:0.75rem;">
+            <a href="<?= APP_URL ?>/pages/customers_b2b.php" style="font-size:0.78rem;color:#7c3aed;font-weight:700;">Partner Management</a>
+            <span style="color:var(--border-color);">|</span>
+            <a href="<?= APP_URL ?>/portal/home.php" target="_blank" style="font-size:0.78rem;color:var(--text-muted);display:flex;align-items:center;gap:0.3rem;">
+                <i class="fas fa-external-link-alt"></i> Portal Preview
+            </a>
+        </div>
     </div>
     <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:0;">
         <?php foreach ([
-            ['Pending Approvals', $pendingCustomers, 'fas fa-user-clock',       '#ef4444', 'customers_b2b.php?status=pending'],
-            ['Pending RFQs',      $pendingRFQs_cnt,  'fas fa-file-invoice',     '#f97316', 'rfq_manager.php'],
-            ['B2B Revenue',       '₹'.number_format($b2bRevenue,0), 'fas fa-indian-rupee-sign','#16a34a','sales_report.php'],
-            ['New Enquiries',     $newEnquiries,     'fas fa-envelope',         '#6366f1', 'enquiries.php'],
+            ['Partner Management', $totalProducts ? (int)$db->query("SELECT COUNT(*) FROM customers")->fetchColumn() : 0, 'fas fa-handshake',  '#7c3aed', 'customers_b2b.php'],
+            ['New Applications',   $pendingCustomers, 'fas fa-user-plus',       '#ef4444', 'partner_applications.php'],
+            ['Pending RFQs',       $pendingRFQs_cnt,  'fas fa-file-invoice',     '#f97316', 'rfq_manager.php'],
+            ['B2B Revenue',        '₹'.number_format($b2bRevenue,0), 'fas fa-chart-line','#16a34a','sales_report.php'],
         ] as [$label, $val, $icon, $color, $link]):
         ?>
         <a href="<?= APP_URL ?>/pages/<?= $link ?>" style="padding:1.1rem 1.25rem;border-right:1px solid var(--border-color);display:flex;align-items:center;gap:0.85rem;text-decoration:none;transition:background 0.2s;" onmouseover="this.style.background='var(--bg-card2)'" onmouseout="this.style.background=''">
