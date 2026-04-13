@@ -3,10 +3,10 @@
  * TORVO SPAIR — System Readiness Check
  * Use this to verify your Online vs Offline setup.
  */
-require_once __DIR__ . '/config/database.php';
+require_once __DIR__ . '/../config/database.php';
 
 $pageTitle = 'System Readiness Check';
-include __DIR__ . '/includes/header.php';
+include __DIR__ . '/../includes/header.php';
 
 $checks = [];
 
@@ -98,4 +98,4 @@ if (empty($missing)) {
     </div>
 </div>
 
-<?php include __DIR__ . '/includes/footer.php'; ?>
+<?php include __DIR__ . '/../includes/footer.php'; ?>
