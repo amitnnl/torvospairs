@@ -18,8 +18,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $reason = trim($_POST['rejection_reason'] ?? '');
 
     if ($cid && $action === 'approve') {
+        $adminId = $user['id'] ?? 0;
         $db->prepare("UPDATE customers SET status='active', approved_at=NOW(), approved_by=?, rejection_reason=NULL WHERE id=?")
-           ->execute([$user['id'], $cid]);
+           ->execute([$adminId, $cid]);
         // Send in-portal notification
         try {
             $db->prepare("INSERT INTO notifications (customer_id, type, title, message) VALUES (?, 'general', 'Account Approved!', 'Congratulations! Your TORVO SPAIR partner account has been approved. You can now submit RFQs and receive quotations.')")

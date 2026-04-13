@@ -198,6 +198,17 @@ $suspendedCount = $db->query("SELECT COUNT(*) FROM customers WHERE status='suspe
                 <td style="font-size:0.75rem;color:var(--text-muted);"><?= date('d M Y', strtotime($c['created_at'])) ?></td>
                 <td>
                     <div style="display:flex;gap:0.4rem;">
+                        <?php if ($c['status'] === 'pending'): ?>
+                        <form method="POST" style="display:inline;" onsubmit="return confirm('Approve <?= htmlspecialchars($c['company_name']) ?> immediately?')">
+                            <input type="hidden" name="action" value="update_customer">
+                            <input type="hidden" name="customer_id" value="<?= $c['id'] ?>">
+                            <input type="hidden" name="status" value="active">
+                            <input type="hidden" name="tier" value="<?= $c['tier'] ?>">
+                            <button type="submit" class="btn btn-success btn-sm btn-icon" data-tooltip="Quick Approve">
+                                <i class="fas fa-check"></i>
+                            </button>
+                        </form>
+                        <?php endif; ?>
                         <button class="btn btn-outline btn-sm btn-icon" onclick='editCustomer(<?= json_encode($c) ?>)' data-tooltip="Manage">
                             <i class="fas fa-edit"></i>
                         </button>
