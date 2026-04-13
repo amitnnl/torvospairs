@@ -553,11 +553,7 @@ include __DIR__ . '/includes/header.php';
                     <div class="product-sku">SKU: <?= htmlspecialchars($p['sku']) ?></div>
                     <div class="product-footer">
                         <div class="product-price">
-                            <?php if ($customer && isset($customer['status']) && $customer['status'] === 'active'): ?>
-                                <?= formatCurrency($p['price']) ?><small>/unit</small>
-                            <?php else: ?>
-                                <span style="font-size:0.75rem;color:var(--warning);"><i class="fas fa-lock"></i> <?php echo $customer ? 'Pending' : 'Login for Price'; ?></span>
-                            <?php endif; ?>
+                            <span class="product-price-hidden"><i class="fas fa-lock"></i> RFQ Pricing</span>
                         </div>
                         <a href="catalogue.php?search=<?= urlencode($p['sku']) ?>" class="btn-add-rfq" style="text-decoration:none;">
                             <i class="fas fa-eye"></i> View

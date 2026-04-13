@@ -106,9 +106,9 @@ include __DIR__ . '/includes/header.php';
             <!-- Price & Stock -->
             <div style="display:flex;align-items:center;gap:1.25rem;margin-bottom:1rem;padding:1rem;background:var(--bg-gray);border-radius:12px;">
                 <div>
-                    <div style="font-size:0.65rem;text-transform:uppercase;color:var(--text-muted);letter-spacing:0.5px;">Unit Price</div>
-                    <div style="font-size:1.75rem;font-weight:900;color:var(--primary);"><?= formatCurrency($p['price']) ?></div>
-                    <div style="font-size:0.7rem;color:var(--text-muted);">excl. GST</div>
+                    <div style="font-size:0.65rem;text-transform:uppercase;color:var(--text-muted);letter-spacing:0.5px;">Quotation Required</div>
+                    <div class="product-price-hidden" style="font-size:1.75rem;"><i class="fas fa-lock"></i> RFQ Pricing</div>
+                    <div style="font-size:0.7rem;color:var(--text-muted);">Prices set by admin upon request</div>
                 </div>
                 <div style="width:1px;height:50px;background:var(--border);"></div>
                 <div>
@@ -239,7 +239,7 @@ include __DIR__ . '/includes/header.php';
                             </div>
                             <div style="display:flex;justify-content:space-between;align-items:center;">
                                 <div style="font-size:0.75rem;color:var(--text-muted);">SKU: <?= htmlspecialchars($dp['sku']) ?></div>
-                                <div style="font-weight:800;color:var(--primary);font-size:0.9rem;"><?= formatCurrency($dp['price']) ?></div>
+                                <div class="product-price-hidden" style="font-size:0.85rem;"><i class="fas fa-lock"></i> RFQ</div>
                             </div>
                             <div style="margin-top:0.75rem;">
                                 <a href="product.php?id=<?= $dp['part_product_id'] ?>" class="btn btn-outline btn-sm btn-full" style="font-size:0.7rem;padding:0.4rem;">
@@ -312,7 +312,7 @@ include __DIR__ . '/includes/header.php';
                     <div class="product-name"><?= htmlspecialchars($rp['name']) ?></div>
                     <div class="product-sku">SKU: <?= htmlspecialchars($rp['sku']) ?></div>
                     <div class="product-footer">
-                        <div class="product-price"><?= formatCurrency($rp['price']) ?></div>
+                        <div class="product-price-hidden"><i class="fas fa-lock"></i> RFQ Pricing</div>
                         <a href="product.php?id=<?= $rp['id'] ?>" class="btn-add-rfq" style="text-decoration:none;"><i class="fas fa-eye"></i> View</a>
                     </div>
                 </div>
