@@ -2,6 +2,9 @@
 require_once __DIR__ . '/config/auth.php';
 requireCustomerLogin();
 
+if (($_SESSION['portal_customer']['status'] ?? '') !== 'active') {
+    refreshCustomerSession();
+}
 $customer = currentCustomer();
 $db  = portalDB();
 $cid = $customer['id'];

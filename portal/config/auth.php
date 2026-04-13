@@ -128,6 +128,12 @@ function getPortalFlash(string $type): ?string {
 // New: require customer to be logged in AND approved (active)
 function requireActivePartner(): void {
     requireCustomerLogin();
+    
+    // Refresh session if status is NOT active, to see if admin just approved it
+    if (($_SESSION['portal_customer']['status'] ?? '') !== 'active') {
+        refreshCustomerSession();
+    }
+
     $c = currentCustomer();
     if (($c['status'] ?? '') !== 'active') {
         header('Location: ' . PORTAL_URL . '/index.php?pending=1');
