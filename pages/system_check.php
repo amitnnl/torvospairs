@@ -5,49 +5,9 @@
  */
 require_once __DIR__ . '/../config/database.php';
 
-$pageTitle = 'System Readiness Check';
-include __DIR__ . '/../includes/header.php';
+$db = getDB();
 
-$checks = [];
-
-// 1. Database Connection
-try {
-    $db = getDB();
-    $db->query("SELECT 1");
-    $checks[] = ['label' => 'Database Connection', 'status' => 'success', 'msg' => 'Connected to ' . DB_NAME . ' @ ' . DB_HOST];
-} catch (Exception $e) {
-    $checks[] = ['label' => 'Database Connection', 'status' => 'danger', 'msg' => 'Failed: ' . $e->getMessage()];
-}
-
-// 2. Upload Directory Permissions
-$uploadDir = UPLOAD_DIR;
-if (is_dir($uploadDir)) {
-    if (is_writable($uploadDir)) {
-        $checks[] = ['label' => 'Uploads Directory', 'status' => 'success', 'msg' => 'Writable: ' . realpath($uploadDir)];
-    } else {
-        $checks[] = ['label' => 'Uploads Directory', 'status' => 'danger', 'msg' => 'NOT Writable. Please set permissions to 755 or 777 on your server.'];
-    }
-} else {
-    // Try to create it
-    if (@mkdir($uploadDir, 0755, true)) {
-        $checks[] = ['label' => 'Uploads Directory', 'status' => 'success', 'msg' => 'Created successfully.'];
-    } else {
-        $checks[] = ['label' => 'Uploads Directory', 'status' => 'danger', 'msg' => 'Missing and could not be created at ' . $uploadDir];
-    }
-}
-
-// 3. PHP Version
-if (version_compare(PHP_VERSION, '8.0.0', '>=')) {
-    $checks[] = ['label' => 'PHP Version', 'status' => 'success', 'msg' => 'v' . PHP_VERSION . ' (Requirement: 8.0+)'];
-} else {
-    $checks[] = ['label' => 'PHP Version', 'status' => 'warning', 'msg' => 'v' . PHP_VERSION . '. Some features like "match" expressions require PHP 8.0+.'];
-}
-
-// 4. URL Configuration
-$checks[] = ['label' => 'Base URL Detect', 'status' => 'info', 'msg' => 'Detected: ' . APP_URL];
-
-// 5. Critical Tables & Repair Logic
-$requiredTables = ['products', 'categories', 'customers', 'rfqs', 'rfq_items', 'notifications', 'settings', 'invoices', 'stock_logs'];
+// ═══ HANDLE DATABASE REPAIR (Must be before output) ═══════════════
 if (isset($_POST['repair_db'])) {
     // Migration Logic
     $db->exec("CREATE TABLE IF NOT EXISTS `settings` (
@@ -157,6 +117,48 @@ if (isset($_POST['repair_db'])) {
     header("Location: system_check.php"); exit;
 }
 
+$pageTitle = 'System Readiness Check';
+include __DIR__ . '/../includes/header.php';
+
+$checks = [];
+
+// 1. Database Connection
+try {
+    $db->query("SELECT 1");
+    $checks[] = ['label' => 'Database Connection', 'status' => 'success', 'msg' => 'Connected to ' . DB_NAME . ' @ ' . DB_HOST];
+} catch (Exception $e) {
+    $checks[] = ['label' => 'Database Connection', 'status' => 'danger', 'msg' => 'Failed: ' . $e->getMessage()];
+}
+
+// 2. Upload Directory Permissions
+$uploadDir = UPLOAD_DIR;
+if (is_dir($uploadDir)) {
+    if (is_writable($uploadDir)) {
+        $checks[] = ['label' => 'Uploads Directory', 'status' => 'success', 'msg' => 'Writable: ' . realpath($uploadDir)];
+    } else {
+        $checks[] = ['label' => 'Uploads Directory', 'status' => 'danger', 'msg' => 'NOT Writable. Please set permissions to 755 or 777 on your server.'];
+    }
+} else {
+    // Try to create it
+    if (@mkdir($uploadDir, 0755, true)) {
+        $checks[] = ['label' => 'Uploads Directory', 'status' => 'success', 'msg' => 'Created successfully.'];
+    } else {
+        $checks[] = ['label' => 'Uploads Directory', 'status' => 'danger', 'msg' => 'Missing and could not be created at ' . $uploadDir];
+    }
+}
+
+// 3. PHP Version
+if (version_compare(PHP_VERSION, '8.0.0', '>=')) {
+    $checks[] = ['label' => 'PHP Version', 'status' => 'success', 'msg' => 'v' . PHP_VERSION . ' (Requirement: 8.0+)'];
+} else {
+    $checks[] = ['label' => 'PHP Version', 'status' => 'warning', 'msg' => 'v' . PHP_VERSION . '. Some features like "match" expressions require PHP 8.0+.'];
+}
+
+// 4. URL Configuration
+$checks[] = ['label' => 'Base URL Detect', 'status' => 'info', 'msg' => 'Detected: ' . APP_URL];
+
+// 5. Critical Tables Checks
+$requiredTables = ['products', 'categories', 'customers', 'rfqs', 'rfq_items', 'notifications', 'settings', 'invoices', 'stock_logs'];
 $missing = [];
 foreach ($requiredTables as $t) {
     if (!$db->query("SHOW TABLES LIKE '$t'")->fetch()) $missing[] = $t;
