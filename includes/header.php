@@ -138,6 +138,10 @@ $flashInfo    = getFlash('info');
                 <div class="nav-icon"><i class="fas fa-cogs"></i></div>
                 Site Settings
             </a>
+            <a href="<?= APP_URL ?>/pages/system_check.php" class="sidebar-nav-item <?= ($activePage ?? '') === 'system_check' ? 'active' : '' ?>">
+                <div class="nav-icon"><i class="fas fa-microscope"></i></div>
+                System Check
+            </a>
         </div>
         
         <div style="height:20px;"></div>
