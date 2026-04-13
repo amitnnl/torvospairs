@@ -1,18 +1,16 @@
 <?php
 // includes/header.php
-// Usage: include at top of every page
-// Expects: $pageTitle (string), $pageIcon (fa class), $activePage (string)
-
 if (!defined('BASE_PATH')) define('BASE_PATH', dirname(__DIR__));
 require_once BASE_PATH . '/config/database.php';
 requireLogin();
 
-$user = currentUser();
+$user     = currentUser();
 $initials = strtoupper(substr($user['name'], 0, 1));
 
-// Low stock count for notification badge
 $db = getDB();
-$lowStockCount = $db->query("SELECT COUNT(*) FROM products WHERE quantity <= min_stock AND status = 'active'")->fetchColumn();
+$lowStockCount   = $db->query("SELECT COUNT(*) FROM products WHERE quantity <= min_stock AND status = 'active'")->fetchColumn();
+$pendingPartners = (int)$db->query("SELECT COUNT(*) FROM customers WHERE status='pending'")->fetchColumn();
+$newRFQs         = (int)$db->query("SELECT COUNT(*) FROM rfqs WHERE status='submitted'")->fetchColumn();
 
 // Flash messages
 $flashSuccess = getFlash('success');
@@ -101,6 +99,12 @@ $flashInfo    = getFlash('info');
             <a href="<?= APP_URL ?>/pages/rfq_manager.php" class="sidebar-nav-item <?= ($activePage ?? '') === 'rfqs' ? 'active' : '' ?>">
                 <div class="nav-icon"><i class="fas fa-file-alt"></i></div>
                 RFQ Manager
+                <?php if ($newRFQs > 0): ?><span class="nav-badge" style="background:var(--danger);"><?= $newRFQs ?></span><?php endif; ?>
+            </a>
+            <a href="<?= APP_URL ?>/pages/partner_applications.php" class="sidebar-nav-item <?= ($activePage ?? '') === 'partner_applications' ? 'active' : '' ?>">
+                <div class="nav-icon"><i class="fas fa-handshake"></i></div>
+                Partner Applications
+                <?php if ($pendingPartners > 0): ?><span class="nav-badge" style="background:var(--warning);color:#000;"><?= $pendingPartners ?></span><?php endif; ?>
             </a>
             <a href="<?= APP_URL ?>/pages/customers_b2b.php" class="sidebar-nav-item <?= ($activePage ?? '') === 'customers_b2b' ? 'active' : '' ?>">
                 <div class="nav-icon"><i class="fas fa-building"></i></div>
@@ -183,9 +187,16 @@ $flashInfo    = getFlash('info');
                 <i class="fas fa-bell"></i>
                 <?php if ($lowStockCount > 0): ?><span class="notif-dot"></span><?php endif; ?>
             </a>
-            <a href="<?= APP_URL ?>/pages/rfq_manager.php" class="icon-btn" data-tooltip="RFQ Inbox">
+            <a href="<?= APP_URL ?>/pages/rfq_manager.php" class="icon-btn" data-tooltip="RFQ Inbox (<?= $newRFQs ?> new)">
                 <i class="fas fa-file-alt"></i>
+                <?php if ($newRFQs > 0): ?><span class="notif-dot" style="background:var(--danger);"></span><?php endif; ?>
             </a>
+            <?php if ($pendingPartners > 0): ?>
+            <a href="<?= APP_URL ?>/pages/partner_applications.php" class="icon-btn" data-tooltip="<?= $pendingPartners ?> partners awaiting approval" style="position:relative;">
+                <i class="fas fa-handshake"></i>
+                <span class="notif-dot" style="background:var(--warning);"></span>
+            </a>
+            <?php endif; ?>
             <a href="<?= APP_URL ?>/portal/catalogue.php" target="_blank" class="icon-btn" data-tooltip="B2B Portal" style="background:linear-gradient(135deg,var(--primary),var(--accent));color:#fff;border-color:transparent;">
                 <i class="fas fa-store"></i>
             </a>
