@@ -227,12 +227,14 @@ $rfqCart = getRFQCart();
                 </div>
                 <?php endif; ?>
                 <div class="product-footer">
-                    <div class="product-price">
-                        <?php if ($customer && isset($customer['status']) && $customer['status'] === 'active'): ?>
-                            <?= formatCurrency($p['price']) ?>
-                            <small>/ unit</small>
+                    <div class="product-price-hidden">
+                        <i class="fas fa-lock"></i>
+                        <?php if (!$customer): ?>
+                            <span>Login to Request Quote</span>
+                        <?php elseif (($customer['status'] ?? '') === 'pending'): ?>
+                            <span>Approval Pending</span>
                         <?php else: ?>
-                            <div style="font-size:0.75rem;color:var(--warning);font-weight:700;"><i class="fas fa-lock"></i> <?php echo $customer ? 'Pending Approval' : 'Login for Price'; ?></div>
+                            <span>RFQ Pricing</span>
                         <?php endif; ?>
                     </div>
                     <?php if ($p['quantity'] > 0): ?>

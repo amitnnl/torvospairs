@@ -107,9 +107,9 @@ function rfqCount(): int {
     return count($_SESSION['rfq_cart'] ?? []);
 }
 
+
 // ── Flash Messages ─────────────────────────────────────────────────────────────
 
-// Alias: setPortalFlash (used in newer portal pages)
 function setPortalFlash(string $type, string $msg): void {
     $_SESSION['portal_flash'][$type] = $msg;
 }
@@ -123,6 +123,50 @@ function getPortalFlash(string $type): ?string {
     return null;
 }
 
+// ── Partner Approval Guards ────────────────────────────────────────────────────
+
+// New: require customer to be logged in AND approved (active)
+function requireActivePartner(): void {
+    requireCustomerLogin();
+    $c = currentCustomer();
+    if (($c['status'] ?? '') !== 'active') {
+        header('Location: ' . PORTAL_URL . '/index.php?pending=1');
+        exit;
+    }
+}
+
+// Refresh customer session from DB (call after login or approval)
+function refreshCustomerSession(): void {
+    if (!customerLoggedIn()) return;
+    $db   = portalDB();
+    $stmt = $db->prepare("SELECT * FROM customers WHERE id = ?");
+    $stmt->execute([$_SESSION['customer_id']]);
+    $row  = $stmt->fetch();
+    if ($row) {
+        $_SESSION['portal_customer'] = $row;
+    }
+}
+
+// ── Notifications ──────────────────────────────────────────────────────────────
+
+function sendNotification(int $customerId, string $type, string $title, string $message, ?int $rfqId = null): void {
+    try {
+        $db = portalDB();
+        $db->prepare("INSERT INTO notifications (customer_id, type, title, message, rfq_id) VALUES (?,?,?,?,?)")
+           ->execute([$customerId, $type, $title, $message, $rfqId]);
+    } catch (PDOException $e) { /* Silent fail */ }
+}
+
+function unreadNotificationCount(): int {
+    if (!customerLoggedIn()) return 0;
+    try {
+        $db   = portalDB();
+        $stmt = $db->prepare("SELECT COUNT(*) FROM notifications WHERE customer_id = ? AND is_read = 0");
+        $stmt->execute([$_SESSION['customer_id']]);
+        return (int)$stmt->fetchColumn();
+    } catch (PDOException $e) { return 0; }
+}
+
 // ── Utilities ──────────────────────────────────────────────────────────────────
 
 if (!function_exists('getSetting')) {
@@ -134,7 +178,7 @@ if (!function_exists('getSetting')) {
             $val = $stmt->fetchColumn();
             return $val !== false ? $val : $default;
         } catch (PDOException $e) {
-            return $default; // Graceful fallback if table is missing
+            return $default;
         }
     }
 }
@@ -150,4 +194,3 @@ if (!function_exists('formatCurrency')) {
         return '₹' . number_format($v, 2);
     }
 }
-

@@ -1,9 +1,15 @@
 <?php
 require_once __DIR__ . '/config/auth.php';
 
-
 // Redirect if already logged in
-if (customerLoggedIn()) { header('Location: dashboard.php'); exit; }
+if (customerLoggedIn()) {
+    $c = currentCustomer();
+    if (($c['status'] ?? '') === 'pending') {
+        // Show pending page instead of dashboard
+    } else {
+        header('Location: dashboard.php'); exit;
+    }
+}
 
 $error = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -20,25 +26,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if ($cust && password_verify($pass, $cust['password'])) {
             if ($cust['status'] === 'pending') {
-                $error = 'Your account is pending approval. We will notify you by email.';
+                // Let them log in — they'll see the pending page
+                $_SESSION['customer_id']     = $cust['id'];
+                $_SESSION['portal_customer'] = $cust; // full row
+                header('Location: index.php?pending=1'); exit;
             } elseif ($cust['status'] === 'suspended') {
                 $error = 'Your account has been suspended. Please contact us.';
             } else {
-                $_SESSION['customer_id']      = $cust['id'];
-                $_SESSION['customer_name']    = $cust['contact_name'];
-                $_SESSION['customer_company'] = $cust['company_name'];
-                $_SESSION['customer_email']   = $cust['email'];
-                $_SESSION['customer_tier']    = $cust['tier'];
-                // Unified customer array for profile/newer pages
-                $_SESSION['portal_customer']  = [
-                    'id'      => $cust['id'],
-                    'name'    => $cust['contact_name'],
-                    'company' => $cust['company_name'],
-                    'email'   => $cust['email'],
-                    'tier'    => $cust['tier'],
-                    'phone'   => $cust['phone'] ?? '',
-                    'status'  => $cust['status'],
-                ];
+                $_SESSION['customer_id']     = $cust['id'];
+                $_SESSION['portal_customer'] = $cust; // full row including status
                 $redirect = sanitize($_GET['redirect_to'] ?? '');
                 header('Location: ' . ($redirect ?: 'dashboard.php')); exit;
             }
@@ -69,8 +65,14 @@ include __DIR__ . '/includes/header.php';
         <div class="alert alert-info"><i class="fas fa-info-circle"></i> Please log in to add items to your RFQ or submit a quotation request.</div>
         <?php endif; ?>
 
-        <?php if (!empty($_GET['registered'])): ?>
-        <div class="alert alert-success"><i class="fas fa-check-circle"></i> Registration submitted! We'll review and activate your account shortly.</div>
+        <?php if (!empty($_GET['pending'])): ?>
+        <div class="alert alert-warning" style="text-align:center;">
+            <i class="fas fa-hourglass-half"></i>
+            <div>
+                <strong>Application Under Review</strong><br>
+                <span style="font-size:0.85rem;">Your partner account is pending admin approval. You'll receive an email once activated. Meanwhile you can still browse our catalogue.</span>
+            </div>
+        </div>
         <?php endif; ?>
 
         <form method="POST">

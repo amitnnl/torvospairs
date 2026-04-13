@@ -1,0 +1,140 @@
+Tables: categories, customers, enquiries, product_compatibility, products, rfq_items, rfqs, settings, stock_logs, tools, users
+
+Settings Columns:
+Array
+(
+    [0] => Array
+        (
+            [Field] => setting_key
+            [Type] => varchar(100)
+            [Null] => NO
+            [Key] => PRI
+            [Default] => 
+            [Extra] => 
+        )
+
+    [1] => Array
+        (
+            [Field] => setting_value
+            [Type] => text
+            [Null] => YES
+            [Key] => 
+            [Default] => 
+            [Extra] => 
+        )
+
+    [2] => Array
+        (
+            [Field] => category
+            [Type] => enum('general','appearance','frontend','contact','admin','system')
+            [Null] => YES
+            [Key] => 
+            [Default] => general
+            [Extra] => 
+        )
+
+)
+
+Settings Data:
+Array
+(
+    [0] => Array
+        (
+            [setting_key] => b2b_subtitle
+            [setting_value] => B2B PORTAL
+            [category] => general
+        )
+
+    [1] => Array
+        (
+            [setting_key] => contact_address
+            [setting_value] => Mumbai, Maharashtra
+            [category] => contact
+        )
+
+    [2] => Array
+        (
+            [setting_key] => contact_email
+            [setting_value] => sales@torvo.com
+            [category] => contact
+        )
+
+    [3] => Array
+        (
+            [setting_key] => contact_phone
+            [setting_value] => +91 98000 00000
+            [category] => contact
+        )
+
+    [4] => Array
+        (
+            [setting_key] => hero_slide_1
+            [setting_value] => slider_1775885306_fed6c00c.webp
+            [category] => frontend
+        )
+
+    [5] => Array
+        (
+            [setting_key] => hero_slide_2
+            [setting_value] => slider_1775885306_cde3e343.jpg
+            [category] => frontend
+        )
+
+    [6] => Array
+        (
+            [setting_key] => hero_slide_3
+            [setting_value] => slider_1775885306_3e10266d.jpg
+            [category] => frontend
+        )
+
+    [7] => Array
+        (
+            [setting_key] => hero_subtitle
+            [setting_value] => 15+ genuine parts for Drills, Grinders, Cutters &amp;amp;amp;amp; more. Filter by tool compatibility, get instant quotes, and track your orders — all in one place.
+            [category] => frontend
+        )
+
+    [8] => Array
+        (
+            [setting_key] => hero_title
+            [setting_value] => Ultimate Power Tool Parts
+            [category] => frontend
+        )
+
+    [9] => Array
+        (
+            [setting_key] => logo_image
+            [setting_value] => 
+            [category] => appearance
+        )
+
+    [10] => Array
+        (
+            [setting_key] => primary_color
+            [setting_value] => #2563eb
+            [category] => appearance
+        )
+
+    [11] => Array
+        (
+            [setting_key] => primary_color_light
+            [setting_value] => #1d4ed8
+            [category] => appearance
+        )
+
+    [12] => Array
+        (
+            [setting_key] => site_title
+            [setting_value] => TORVO SPAIR
+            [category] => general
+        )
+
+    [13] => Array
+        (
+            [setting_key] => whatsapp_number
+            [setting_value] => 919800000000
+            [category] => contact
+        )
+
+)
+

@@ -1,7 +1,6 @@
 <?php
 require_once __DIR__ . '/config/auth.php';
-
-requireCustomerLogin();
+requireActivePartner();
 
 $customer = currentCustomer();
 $db  = portalDB();
@@ -44,16 +43,30 @@ include __DIR__ . '/includes/header.php';
                 <tr><th>RFQ Number</th><th>Items</th><th>Status</th><th>Admin Notes</th><th>Submitted</th><th>Action</th></tr>
             </thead>
             <tbody>
-            <?php foreach ($rfqList as $r): ?>
-            <tr>
-                <td style="font-weight:700;color:var(--primary);"><?= htmlspecialchars($r['rfq_number']) ?></td>
+            <?php foreach ($rfqList as $r):
+                $isQuoted   = ($r['status'] === 'quoted');
+                $isInvoiced = ($r['status'] === 'invoiced');
+            ?>
+            <tr style="<?= $isQuoted ? 'background:rgba(124,58,237,0.04);' : '' ?>">
+                <td style="font-weight:700;color:var(--primary);"><?= htmlspecialchars($r['rfq_number']) ?>
+                    <?php if ($isQuoted): ?><span style="background:#7c3aed;color:#fff;font-size:0.65rem;padding:2px 7px;border-radius:10px;margin-left:5px;font-weight:700;">NEW QUOTE</span><?php endif; ?>
+                </td>
                 <td><?= $r['item_count'] ?> item<?= $r['item_count']!=1?'s':'' ?></td>
                 <td><span class="status-badge status-<?= $r['status'] ?>"><?= ucfirst($r['status']) ?></span></td>
                 <td style="font-size:0.8rem;color:var(--text-muted);max-width:200px;">
-                    <?= $r['admin_notes'] ? htmlspecialchars(substr($r['admin_notes'],0,80)) . (strlen($r['admin_notes'])>80?'…':'') : '—' ?>
+                    <?= $r['admin_notes'] ? htmlspecialchars(substr($r['admin_notes'],0,80)).(strlen($r['admin_notes'])>80?'…':'') : '—' ?>
                 </td>
                 <td style="font-size:0.78rem;color:var(--text-muted);white-space:nowrap;"><?= date('d M Y, h:ia', strtotime($r['created_at'])) ?></td>
-                <td><a href="rfq_detail.php?id=<?= $r['id'] ?>" class="btn btn-outline btn-sm"><i class="fas fa-eye"></i> View</a></td>
+                <td style="display:flex;gap:0.4rem;flex-wrap:wrap;">
+                    <a href="rfq_view.php?id=<?= $r['id'] ?>" class="btn btn-outline btn-sm">
+                        <?= $isQuoted ? '<i class="fas fa-file-invoice-dollar"></i> Review Quote' : '<i class="fas fa-eye"></i> View' ?>
+                    </a>
+                    <?php if ($isInvoiced): ?>
+                    <a href="invoice_view.php?rfq=<?= $r['id'] ?>" class="btn btn-sm" style="background:var(--success);color:#fff;" target="_blank">
+                        <i class="fas fa-file-pdf"></i> Invoice
+                    </a>
+                    <?php endif; ?>
+                </td>
             </tr>
             <?php endforeach; ?>
             </tbody>
