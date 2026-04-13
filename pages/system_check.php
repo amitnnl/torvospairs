@@ -46,8 +46,117 @@ if (version_compare(PHP_VERSION, '8.0.0', '>=')) {
 // 4. URL Configuration
 $checks[] = ['label' => 'Base URL Detect', 'status' => 'info', 'msg' => 'Detected: ' . APP_URL];
 
-// 5. Critical Tables
-$requiredTables = ['products', 'categories', 'customers', 'rfqs', 'notifications', 'settings'];
+// 5. Critical Tables & Repair Logic
+$requiredTables = ['products', 'categories', 'customers', 'rfqs', 'rfq_items', 'notifications', 'settings', 'invoices', 'stock_logs'];
+if (isset($_POST['repair_db'])) {
+    // Migration Logic
+    $db->exec("CREATE TABLE IF NOT EXISTS `settings` (
+        `id` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+        `setting_key` varchar(100) NOT NULL UNIQUE,
+        `setting_value` text DEFAULT NULL,
+        `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
+
+    $db->exec("CREATE TABLE IF NOT EXISTS `categories` (
+        `id` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+        `name` varchar(100) NOT NULL,
+        `description` text DEFAULT NULL,
+        `image` varchar(255) DEFAULT NULL,
+        `status` enum('active','inactive') DEFAULT 'active',
+        `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
+
+    $db->exec("CREATE TABLE IF NOT EXISTS `products` (
+        `id` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+        `category_id` int(11) NOT NULL,
+        `name` varchar(200) NOT NULL,
+        `sku` varchar(50) NOT NULL UNIQUE,
+        `brand` varchar(100) DEFAULT NULL,
+        `description` text DEFAULT NULL,
+        `image` varchar(255) DEFAULT NULL,
+        `price` decimal(10,2) NOT NULL DEFAULT 0.00,
+        `quantity` int(11) NOT NULL DEFAULT 0,
+        `min_stock` int(11) NOT NULL DEFAULT 5,
+        `status` enum('active','inactive') DEFAULT 'active',
+        `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
+
+    $db->exec("CREATE TABLE IF NOT EXISTS `customers` (
+        `id` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+        `company_name` varchar(150) NOT NULL,
+        `contact_name` varchar(100) NOT NULL,
+        `email` varchar(150) NOT NULL UNIQUE,
+        `password` varchar(255) NOT NULL,
+        `phone` varchar(20) DEFAULT NULL,
+        `gstin` varchar(20) DEFAULT NULL,
+        `address` text DEFAULT NULL,
+        `city` varchar(80) DEFAULT NULL,
+        `state` varchar(80) DEFAULT NULL,
+        `pin` varchar(10) DEFAULT NULL,
+        `tier` enum('standard','silver','gold') DEFAULT 'standard',
+        `status` enum('pending','active','suspended') DEFAULT 'pending',
+        `notes` text DEFAULT NULL,
+        `rejection_reason` varchar(500) DEFAULT NULL,
+        `approved_at` datetime DEFAULT NULL,
+        `approved_by` int(11) DEFAULT NULL,
+        `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
+
+    $db->exec("CREATE TABLE IF NOT EXISTS `rfqs` (
+        `id` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+        `customer_id` int(11) NOT NULL,
+        `rfq_number` varchar(30) UNIQUE,
+        `status` enum('submitted','reviewing','quoted','accepted','rejected','invoiced','closed') DEFAULT 'submitted',
+        `customer_notes` text DEFAULT NULL,
+        `admin_notes` text DEFAULT NULL,
+        `accepted_at` datetime DEFAULT NULL,
+        `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
+
+    $db->exec("CREATE TABLE IF NOT EXISTS `rfq_items` (
+        `id` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+        `rfq_id` int(11) NOT NULL,
+        `product_id` int(11) NOT NULL,
+        `quantity` int(11) NOT NULL DEFAULT 1,
+        `unit_price` decimal(10,2) DEFAULT NULL,
+        `notes` text DEFAULT NULL
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
+
+    $db->exec("CREATE TABLE IF NOT EXISTS `notifications` (
+        `id` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+        `customer_id` int(11) NOT NULL,
+        `type` enum('rfq_quoted','rfq_invoiced','rfq_rejected','general') DEFAULT 'general',
+        `title` varchar(200) NOT NULL,
+        `message` text NOT NULL,
+        `rfq_id` int(11) DEFAULT NULL,
+        `is_read` tinyint(1) DEFAULT 0,
+        `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
+
+    $db->exec("CREATE TABLE IF NOT EXISTS `stock_logs` (
+        `id` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+        `product_id` int(11) NOT NULL,
+        `user_id` int(11) NOT NULL,
+        `type` enum('in','out') NOT NULL,
+        `quantity` int(11) NOT NULL,
+        `notes` varchar(255) DEFAULT NULL,
+        `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
+
+    $db->exec("CREATE TABLE IF NOT EXISTS `invoices` (
+        `id` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+        `rfq_id` int(11) NOT NULL,
+        `invoice_number` varchar(50) UNIQUE,
+        `discount_amount` decimal(10,2) DEFAULT 0.00,
+        `tax_amount` decimal(10,2) DEFAULT 0.00,
+        `total_amount` decimal(10,2) NOT NULL,
+        `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
+
+    setFlash('success', 'Database schema repaired successfully!');
+    header("Location: system_check.php"); exit;
+}
+
 $missing = [];
 foreach ($requiredTables as $t) {
     if (!$db->query("SHOW TABLES LIKE '$t'")->fetch()) $missing[] = $t;
@@ -55,7 +164,7 @@ foreach ($requiredTables as $t) {
 if (empty($missing)) {
     $checks[] = ['label' => 'Database Schema', 'status' => 'success', 'msg' => 'All critical tables exist.'];
 } else {
-    $checks[] = ['label' => 'Database Schema', 'status' => 'danger', 'msg' => 'Missing tables: ' . implode(', ', $missing) . '. Please run setup.php or import database.sql.'];
+    $checks[] = ['label' => 'Database Schema', 'status' => 'danger', 'msg' => 'Missing tables: ' . implode(', ', $missing)];
 }
 
 ?>
@@ -83,14 +192,16 @@ if (empty($missing)) {
                 </div>
 
                 <div style="margin-top:2rem;background:rgba(37,99,235,0.05);padding:1.5rem;border-radius:12px;border:1px dashed var(--primary);">
-                    <div style="font-weight:800;color:var(--primary);margin-bottom:0.5rem;"><i class="fas fa-lightbulb"></i> Pro-Tip for Online Deployment</div>
-                    <div style="font-size:0.85rem;color:var(--text-medium);line-height:1.6;">
-                        If you are moving from Local to Online:
-                        <ol style="margin-top:0.5rem;display:grid;gap:0.4rem;">
-                            <li>Create a file named <code>config/db_config.php</code> on your online server.</li>
-                            <li>Copy your online cPanel database credentials into that file.</li>
-                            <li>This file is ignored by Git, so your local machine can keep its local settings while the server stays connected online.</li>
-                        </ol>
+                    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;">
+                        <div style="flex:1;min-width:250px;">
+                            <div style="font-weight:800;color:var(--primary);margin-bottom:0.4rem;"><i class="fas fa-magic"></i> Database Repair</div>
+                            <div style="font-size:0.85rem;color:var(--text-medium);">Click the button to automatically create any missing tables. This will not delete existing data.</div>
+                        </div>
+                        <form method="POST">
+                            <button type="submit" name="repair_db" class="btn btn-primary">
+                                <i class="fas fa-tools"></i> Repair Database Schema
+                            </button>
+                        </form>
                     </div>
                 </div>
             </div>
