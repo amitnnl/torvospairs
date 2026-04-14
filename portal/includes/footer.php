@@ -39,7 +39,11 @@
         </div>
         <div class="footer-bottom">
             <span><a href="../admin.php" style="color:rgba(255,255,255,0.5);text-decoration:none;" target="_blank"><i class="fas fa-lock" style="font-size:0.75rem;"></i> Admin Panel</a> &nbsp;&middot;&nbsp; © <?= date('Y') ?> <?= getSetting('site_title', 'TORVO SPAIR') ?>. All rights reserved.</span>
-            <span><?= getSetting('b2b_subtitle', 'B2B PORTAL') ?> · <a href="<?= PORTAL_URL ?>/contact.php" style="color:rgba(255,255,255,0.5);">Contact</a></span>
+            <span>
+                <a href="<?= PORTAL_URL ?>/privacy.php" style="color:rgba(255,255,255,0.5);text-decoration:none;">Privacy Policy</a> &nbsp;&middot;&nbsp; 
+                <a href="<?= PORTAL_URL ?>/terms.php" style="color:rgba(255,255,255,0.5);text-decoration:none;">Terms of Service</a> &nbsp;&middot;&nbsp; 
+                <a href="<?= PORTAL_URL ?>/contact.php" style="color:rgba(255,255,255,0.5);text-decoration:none;">Contact</a>
+            </span>
         </div>
     </div>
 </footer>
