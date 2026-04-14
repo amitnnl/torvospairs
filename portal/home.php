@@ -479,7 +479,7 @@ include __DIR__ . '/includes/header.php';
                 ['2','Browse',      'fas fa-search',       'Explore 500+ parts filtered by your tool type.', 'var(--primary-light)'],
                 ['3','Request RFQ', 'fas fa-file-invoice', 'Add to cart and submit a Request for Quotation.', '#6366f1'],
                 ['4','Get Shipped', 'fas fa-truck',        'Receive confirmed pricing and track your delivery.', 'var(--accent)'],
-            ] as array $stepInfo): 
+            ] as $stepInfo): 
                 list($step, $title, $icon, $desc, $color) = $stepInfo;
             ?>
             <div class="process-step animate__animated animate__fadeInUp" style="animation-delay: <?= $step * 0.1 ?>s">
