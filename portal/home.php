@@ -479,8 +479,10 @@ include __DIR__ . '/includes/header.php';
                 ['2','Browse',      'fas fa-search',       'Explore 500+ parts filtered by your tool type.', 'var(--primary-light)'],
                 ['3','Request RFQ', 'fas fa-file-invoice', 'Add to cart and submit a Request for Quotation.', '#6366f1'],
                 ['4','Get Shipped', 'fas fa-truck',        'Receive confirmed pricing and track your delivery.', 'var(--accent)'],
-            ] as [$step, $title, $icon, $desc, $color]): ?>
-            <div class="process-step">
+            ] as array $stepInfo): 
+                list($step, $title, $icon, $desc, $color) = $stepInfo;
+            ?>
+            <div class="process-step animate__animated animate__fadeInUp" style="animation-delay: <?= $step * 0.1 ?>s">
                 <div style="width:56px;height:56px;border-radius:50%;background:<?= $color ?>;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;box-shadow:0 8px 20px <?= $color ?>33;">
                     <i class="<?= $icon ?>" style="color:#fff;font-size:1.1rem;"></i>
                 </div>
@@ -510,7 +512,7 @@ include __DIR__ . '/includes/header.php';
             foreach ($featCats as $idx => $cat):
                 $color = $catColors[$idx % count($catColors)];
             ?>
-            <a href="catalogue.php?cat=<?= $cat['id'] ?>" class="cat-card" style="--cc:<?= $color ?>;">
+            <a href="catalogue.php?cat=<?= $cat['id'] ?>" class="cat-card animate__animated animate__fadeInUp" style="--cc:<?= $color ?>; animation-delay: <?= $idx * 0.1 ?>s">
                 <div class="cat-icon"><i class="fas fa-cog" style="color:<?= $color ?>;font-size:1.2rem;"></i></div>
                 <div class="cat-name"><?= htmlspecialchars($cat['name']) ?></div>
                 <div class="cat-count"><?= $cat['prod_count'] ?> products</div>
@@ -533,11 +535,11 @@ include __DIR__ . '/includes/header.php';
             <a href="catalogue.php" class="btn btn-outline btn-sm">Full Catalogue <i class="fas fa-arrow-right"></i></a>
         </div>
         <div class="product-grid">
-            <?php foreach (array_slice($newProducts, 0, 4) as $p):
+            <?php foreach (array_slice($newProducts, 0, 4) as $idx => $p):
                 $stockClass = $p['quantity'] == 0 ? 'badge-out' : ($p['quantity'] <= ($p['min_stock']??5) ? 'badge-low' : 'badge-instock');
                 $stockLabel = $p['quantity'] == 0 ? 'Out of Stock' : ($p['quantity'] <= ($p['min_stock']??5) ? 'Low Stock' : 'In Stock');
             ?>
-            <div class="product-card">
+            <div class="product-card animate__animated animate__fadeInUp" style="animation-delay: <?= $idx * 0.1 ?>s">
                 <div class="product-img">
                     <?php if ($p['image'] && file_exists(UPLOAD_DIR.$p['image'])): ?>
                         <img src="<?= UPLOAD_URL.htmlspecialchars($p['image']) ?>" alt="">

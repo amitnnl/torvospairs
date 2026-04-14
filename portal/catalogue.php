@@ -206,7 +206,7 @@ $customer = customerLoggedIn() ? currentCustomer() : null;
             $stockLabel = $p['quantity'] == 0 ? 'Out of Stock' : ($p['quantity'] <= $p['min_stock'] ? 'Low Stock' : 'In Stock');
             $compatTags = $allCompat[$p['id']] ?? [];
         ?>
-        <div class="product-card">
+        <div class="product-card animate__animated animate__fadeInUp" style="animation-delay: <?= ($p['id'] % 10) * 0.05 ?>s">
             <div class="product-img">
                 <?php if ($p['image'] && file_exists(UPLOAD_DIR . $p['image'])): ?>
                     <img src="<?= UPLOAD_URL . htmlspecialchars($p['image']) ?>" alt="<?= htmlspecialchars($p['name']) ?>">

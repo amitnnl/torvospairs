@@ -15,7 +15,8 @@ $notifCount  = unreadNotificationCount();
     <meta name="description" content="<?= getSetting('site_title', 'TORVO SPAIR') ?> B2B Portal — Browse Power Tool Spare Parts, Request Quotations, and Manage Your Orders.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="stylesheet" href="<?= PORTAL_URL ?>/assets/css/portal.css?v=1.1">
     <style>
