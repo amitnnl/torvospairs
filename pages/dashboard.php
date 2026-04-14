@@ -167,7 +167,7 @@ $monthlyData = $db->query("
     <div class="card">
         <div class="card-header">
             <div class="card-title"><i class="fas fa-exclamation-triangle" style="color:var(--warning)"></i> Low Stock Items</div>
-            <a href="pages/stock.php" class="btn btn-outline btn-sm">View All</a>
+            <a href="stock.php" class="btn btn-outline btn-sm">View All</a>
         </div>
         <?php if (empty($lowStockProducts)): ?>
             <div class="empty-state"><i class="fas fa-check-circle" style="color:var(--success)"></i><h3>All stock levels are healthy!</h3></div>
@@ -206,7 +206,7 @@ $monthlyData = $db->query("
     <div class="card">
         <div class="card-header">
             <div class="card-title"><i class="fas fa-clock"></i> Recent Activity</div>
-            <a href="pages/stock.php" class="btn btn-outline btn-sm">View All</a>
+            <a href="stock.php" class="btn btn-outline btn-sm">View All</a>
         </div>
         <?php if (empty($recentLogs)): ?>
             <div class="empty-state"><i class="fas fa-inbox"></i><h3>No activity yet</h3></div>

@@ -191,7 +191,7 @@ include __DIR__ . '/includes/header.php';
         <a href="catalogue.php" class="btn btn-outline">
             <i class="fas fa-shopping-cart"></i> Continue Shopping
         </a>
-        <a href="https://api.whatsapp.com/send?phone=919800000000&text=Hi! I have a query about my order <?= urlencode($o['order_number']) ?>" target="_blank" class="btn btn-outline" style="color:#25d366;border-color:#25d366;">
+        <a href="https://api.whatsapp.com/send?phone=<?= getSetting('whatsapp_number','919800000000') ?>&text=Hi! I have a query about my order <?= urlencode($o['order_number']) ?>" target="_blank" class="btn btn-outline" style="color:#25d366;border-color:#25d366;">
             <i class="fab fa-whatsapp"></i> WhatsApp Us
         </a>
     </div>

@@ -18,7 +18,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $reason = trim($_POST['rejection_reason'] ?? '');
 
     if ($cid && $action === 'approve') {
-        $adminId = $user['id'] ?? 0;
+        $adminId = $_SESSION['user_id'] ?? 0;
         $db->prepare("UPDATE customers SET status='active', approved_at=NOW(), approved_by=?, rejection_reason=NULL WHERE id=?")
            ->execute([$adminId, $cid]);
         // Send in-portal notification

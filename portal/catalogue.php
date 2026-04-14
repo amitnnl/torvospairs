@@ -62,7 +62,8 @@ $pageTitle  = 'Parts Catalogue';
 $activePage = 'catalogue';
 include __DIR__ . '/includes/header.php';
 
-$rfqCart = getRFQCart();
+$rfqCart  = getRFQCart();
+$customer = customerLoggedIn() ? currentCustomer() : null;
 ?>
 
 <!-- Hero (only on fresh load with no filters) -->

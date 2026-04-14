@@ -217,6 +217,9 @@ CREATE TABLE IF NOT EXISTS customers (
     tier ENUM('standard','silver','gold') DEFAULT 'standard',
     status ENUM('pending','active','suspended') DEFAULT 'pending',
     notes TEXT,
+    approved_at DATETIME NULL,
+    approved_by INT DEFAULT NULL,
+    rejection_reason TEXT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -228,9 +231,12 @@ CREATE TABLE IF NOT EXISTS rfqs (
     id INT AUTO_INCREMENT PRIMARY KEY,
     customer_id INT NOT NULL DEFAULT 0,
     rfq_number VARCHAR(30) UNIQUE,
-    status ENUM('submitted','reviewing','quoted','accepted','rejected','closed') DEFAULT 'submitted',
+    status ENUM('submitted','reviewing','quoted','accepted','rejected','invoiced','closed') DEFAULT 'submitted',
     customer_notes TEXT,
     admin_notes TEXT,
+    quoted_at DATETIME NULL,
+    accepted_at DATETIME NULL,
+    invoiced_at DATETIME NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -245,5 +251,83 @@ CREATE TABLE IF NOT EXISTS rfq_items (
     quantity INT NOT NULL DEFAULT 1,
     unit_price DECIMAL(10,2) DEFAULT 0.00,
     notes TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ============================================
+-- TABLE: invoices (B2B Portal)
+-- ============================================
+CREATE TABLE IF NOT EXISTS invoices (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    invoice_number VARCHAR(30) UNIQUE,
+    rfq_id INT NOT NULL,
+    customer_id INT NOT NULL,
+    subtotal DECIMAL(10,2) DEFAULT 0.00,
+    total_amount DECIMAL(10,2) DEFAULT 0.00,
+    payment_status ENUM('unpaid','paid','partial') DEFAULT 'unpaid',
+    notes TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ============================================
+-- TABLE: notifications (B2B Portal)
+-- ============================================
+CREATE TABLE IF NOT EXISTS notifications (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    customer_id INT NOT NULL,
+    type VARCHAR(50) DEFAULT 'general',
+    title VARCHAR(200),
+    message TEXT,
+    rfq_id INT DEFAULT NULL,
+    is_read TINYINT(1) DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ============================================
+-- TABLE: orders (B2B Portal)
+-- ============================================
+CREATE TABLE IF NOT EXISTS orders (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    order_number VARCHAR(30) UNIQUE,
+    rfq_id INT DEFAULT NULL,
+    customer_id INT NOT NULL DEFAULT 0,
+    status ENUM('pending','confirmed','processing','dispatched','delivered','cancelled') DEFAULT 'pending',
+    subtotal DECIMAL(10,2) DEFAULT 0.00,
+    gst_rate DECIMAL(5,2) DEFAULT 18.00,
+    gst_amount DECIMAL(10,2) DEFAULT 0.00,
+    total_amount DECIMAL(10,2) DEFAULT 0.00,
+    shipping_address TEXT,
+    payment_status ENUM('unpaid','paid','partial') DEFAULT 'unpaid',
+    tracking_info VARCHAR(255),
+    admin_notes TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ============================================
+-- TABLE: order_items (B2B Portal)
+-- ============================================
+CREATE TABLE IF NOT EXISTS order_items (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    order_id INT NOT NULL DEFAULT 0,
+    product_id INT NOT NULL DEFAULT 0,
+    quantity INT NOT NULL DEFAULT 1,
+    unit_price DECIMAL(10,2) DEFAULT 0.00,
+    total_price DECIMAL(10,2) DEFAULT 0.00
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ============================================
+-- TABLE: enquiries (Portal Contact Form)
+-- ============================================
+CREATE TABLE IF NOT EXISTS enquiries (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    company VARCHAR(150),
+    email VARCHAR(150) NOT NULL,
+    phone VARCHAR(20),
+    subject VARCHAR(200),
+    message TEXT NOT NULL,
+    status ENUM('new','replied','closed') DEFAULT 'new',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
