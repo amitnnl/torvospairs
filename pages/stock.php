@@ -283,12 +283,16 @@ const skuNameMap = <?= json_encode(array_column($allProducts, 'name', 'sku')) ?>
 let html5QrcodeScanner = null;
 let lastScannedSku = null;
 
+// FIX: Use global .show class (not .active) to match CSS and footer.php
+// We hook into the global openModal defined in footer.php
+const _origOpenModal = window.openModal || function(id) { document.getElementById(id).classList.add('show'); document.body.style.overflow='hidden'; };
+const _origCloseModal = window.closeModal || function(id) { document.getElementById(id).classList.remove('show'); document.body.style.overflow=''; };
 function openModal(id) {
-    document.getElementById(id).classList.add('active');
+    _origOpenModal(id);
     if (id === 'scannerModal') startScanner();
 }
 function closeModal(id) {
-    document.getElementById(id).classList.remove('active');
+    _origCloseModal(id);
 }
 function startScanner() {
     if (html5QrcodeScanner) return;

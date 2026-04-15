@@ -152,7 +152,7 @@ $monthlyData = $db->query("
     <!-- Category Distribution -->
     <div class="card">
         <div class="card-header">
-            <div class="card-title"><i class="fas fa-chart-doughnut"></i> Stock by Category</div>
+            <div class="card-title"><i class="fas fa-chart-pie"></i> Stock by Category</div>
         </div>
         <div class="card-body" style="padding:1rem;">
             <canvas id="categoryChart" height="200"></canvas>

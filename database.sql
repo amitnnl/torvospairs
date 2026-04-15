@@ -89,10 +89,11 @@ CREATE TABLE IF NOT EXISTS stock_logs (
     previous_stock INT NOT NULL,
     current_stock INT NOT NULL,
     notes TEXT,
+    invoice_id INT DEFAULT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ============================================
 -- SAMPLE DATA: users

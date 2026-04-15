@@ -1,13 +1,21 @@
 <?php
 /**
  * TORVO SPAIR - One-Click Database Installer
- * Visit: http://localhost/torvo_spair/setup.php
+ * Visit: http://yourdomain.com/setup.php
  * Delete this file after setup is complete.
  */
 
-define('DB_HOST', 'localhost');
-define('DB_USER', 'root');
-define('DB_PASS', '');
+// Include DB config if it exists
+$db_config = __DIR__ . '/config/db_config.php';
+if (file_exists($db_config)) {
+    require_once $db_config;
+}
+
+// Fallbacks for setup (only if not defined in config)
+if(!defined('DB_HOST')) define('DB_HOST', 'localhost');
+if(!defined('DB_USER')) define('DB_USER', 'root');
+if(!defined('DB_PASS')) define('DB_PASS', '');
+if(!defined('DB_NAME')) define('DB_NAME', 'torvo_spair');
 
 $msgs = [];
 $error = false;
