@@ -71,6 +71,87 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         header('Location: products.php');
         exit;
     }
+
+    // ---- Add Machine (Quick action) ----
+    if ($action === 'add_machine') {
+        $pid = (int)($_POST['product_id'] ?? 0);
+        $tools_sel = $_POST['tool_ids'] ?? [];
+        if ($pid > 0) {
+            $db->prepare("DELETE FROM product_compatibility WHERE product_id = ?")->execute([$pid]);
+            if (!empty($tools_sel)) {
+                $ins = $db->prepare("INSERT IGNORE INTO product_compatibility (product_id, tool_id) VALUES (?,?)");
+                foreach ($tools_sel as $tid) $ins->execute([$pid, (int)$tid]);
+            }
+            setFlash('success', 'Suitable machines updated.');
+        }
+        header('Location: products.php');
+        exit;
+    }
+
+    // ---- CSV Import ----
+    if ($action === 'csv_import' && !empty($_FILES['csv_file']['tmp_name'])) {
+        $handle = fopen($_FILES['csv_file']['tmp_name'], 'r');
+        $header = fgetcsv($handle); // skip header row
+        $imported = 0; $skipped = 0; $errors = [];
+
+        // Pre-load categories for name matching
+        $catMap = [];
+        $catRows = $db->query("SELECT id, LOWER(name) AS name FROM categories")->fetchAll();
+        foreach ($catRows as $cr) $catMap[$cr['name']] = $cr['id'];
+
+        $ins = $db->prepare("INSERT INTO products (name, sku, category_id, brand, price, quantity, min_stock, description, status) VALUES (?,?,?,?,?,?,?,?,?)");
+
+        while (($row = fgetcsv($handle)) !== FALSE) {
+            if (count($row) < 2) continue;
+
+            $pName   = trim($row[0] ?? '');
+            $pSku    = trim($row[1] ?? '') ?: generateSKU();
+            $pCat    = strtolower(trim($row[2] ?? ''));
+            $pBrand  = trim($row[3] ?? '');
+            $pPrice  = (float)($row[4] ?? 0);
+            $pQty    = (int)($row[5] ?? 0);
+            $pMin    = (int)($row[6] ?? 5);
+            $pDesc   = trim($row[7] ?? '');
+
+            if (!$pName) { $skipped++; continue; }
+
+            $catId = $catMap[$pCat] ?? null;
+            if (!$catId) {
+                // Try partial match
+                foreach ($catMap as $catName => $cid) {
+                    if (strpos($catName, $pCat) !== false || strpos($pCat, $catName) !== false) {
+                        $catId = $cid; break;
+                    }
+                }
+            }
+            if (!$catId) {
+                // Use the first category as fallback
+                $catId = reset($catMap) ?: 1;
+                $errors[] = "Row '$pName': category '$pCat' not found, used default.";
+            }
+
+            try {
+                $ins->execute([$pName, $pSku, $catId, $pBrand, $pPrice, $pQty, $pMin, $pDesc, 'active']);
+                $imported++;
+            } catch (PDOException $e) {
+                if (strpos($e->getMessage(), 'Duplicate') !== false) {
+                    $errors[] = "SKU '$pSku' already exists, skipped.";
+                    $skipped++;
+                } else {
+                    $errors[] = "Error importing '$pName': " . $e->getMessage();
+                    $skipped++;
+                }
+            }
+        }
+        fclose($handle);
+
+        $msg = "Imported <strong>$imported</strong> products.";
+        if ($skipped) $msg .= " Skipped: $skipped.";
+        if ($errors) $msg .= '<br><small>' . implode('<br>', array_slice($errors, 0, 5)) . '</small>';
+        setFlash($imported > 0 ? 'success' : 'error', $msg);
+        header('Location: products.php');
+        exit;
+    }
 }
 
 // ---- Filters ----
@@ -157,9 +238,14 @@ $brands     = $db->query("SELECT DISTINCT brand FROM products WHERE brand != '' 
 <div class="card">
     <div class="card-header">
         <div class="card-title"><i class="fas fa-boxes"></i> Products <span style="font-size:0.85rem;color:var(--text-muted);font-weight:400;">(<?= count($products) ?> found)</span></div>
-        <button class="btn btn-primary" onclick="openModal('addProductModal')">
-            <i class="fas fa-plus"></i> Add Product
-        </button>
+        <div style="display:flex;gap:0.5rem;">
+            <button class="btn btn-outline" onclick="openModal('importCsvModal')">
+                <i class="fas fa-file-upload"></i> CSV Import
+            </button>
+            <button class="btn btn-primary" onclick="openModal('addProductModal')">
+                <i class="fas fa-plus"></i> Add Product
+            </button>
+        </div>
     </div>
 
     <?php if (empty($products)): ?>
@@ -179,7 +265,7 @@ $brands     = $db->query("SELECT DISTINCT brand FROM products WHERE brand != '' 
                     <th>Brand</th>
                     <th>Price</th>
                     <th>Stock</th>
-                    <th>Compatibility</th>
+                    <th>Suitable</th>
                     <th>Status</th>
                     <th>Actions</th>
                 </tr>
@@ -187,9 +273,11 @@ $brands     = $db->query("SELECT DISTINCT brand FROM products WHERE brand != '' 
             <tbody>
             <?php foreach ($products as $i => $p):
                 // Get compatible tools for this product
-                $compSt = $db->prepare("SELECT t.name FROM tools t JOIN product_compatibility pc ON t.id=pc.tool_id WHERE pc.product_id=?");
+                $compSt = $db->prepare("SELECT t.id, t.name FROM tools t JOIN product_compatibility pc ON t.id=pc.tool_id WHERE pc.product_id=?");
                 $compSt->execute([$p['id']]);
-                $compatTools = $compSt->fetchAll(PDO::FETCH_COLUMN);
+                $compatResult = $compSt->fetchAll();
+                $compatTools = array_column($compatResult, 'name');
+                $compatToolIds = array_column($compatResult, 'id');
 
                 $pct = $p['min_stock'] > 0 ? min(100, ($p['quantity'] / $p['min_stock']) * 100) : 100;
                 $stockClass = $p['quantity'] == 0 ? 'stock-zero' : ($p['quantity'] <= $p['min_stock'] ? 'stock-low' : 'stock-ok');
@@ -222,14 +310,11 @@ $brands     = $db->query("SELECT DISTINCT brand FROM products WHERE brand != '' 
                 </td>
                 <td>
                     <?php if (empty($compatTools)): ?>
-                        <span style="color:var(--text-muted);font-size:0.78rem;">None</span>
+                        <span style="color:var(--text-muted);font-size:0.75rem;">None</span>
                     <?php else: ?>
-                        <?php foreach (array_slice($compatTools, 0, 2) as $ct): ?>
-                            <span class="compat-tag"><i class="fas fa-wrench"></i><?= htmlspecialchars($ct) ?></span>
-                        <?php endforeach; ?>
-                        <?php if (count($compatTools) > 2): ?>
-                            <span class="badge-pill badge-gray">+<?= count($compatTools)-2 ?></span>
-                        <?php endif; ?>
+                        <button class="btn btn-outline btn-sm" style="color:var(--primary);border-color:var(--primary);" onclick='viewSuitable(<?= json_encode($p['name']) ?>, <?= json_encode($compatTools) ?>)'>
+                            <i class="fas fa-eye"></i> View
+                        </button>
                     <?php endif; ?>
                 </td>
                 <td>
@@ -238,7 +323,12 @@ $brands     = $db->query("SELECT DISTINCT brand FROM products WHERE brand != '' 
                     </span>
                 </td>
                 <td>
-                    <div style="display:flex;gap:0.4rem;">
+                    <div style="display:flex;gap:0.4rem;align-items:center;">
+                        <button class="btn btn-outline btn-sm" style="color:#2563eb;border-color:#2563eb;font-weight:600;"
+                            onclick='addMachineToProduct(<?= $p['id'] ?>, <?= json_encode($p['name']) ?>, <?= json_encode($compatToolIds) ?>)'
+                            data-tooltip="Add Machine">
+                            <i class="fas fa-plug"></i> Add Machine
+                        </button>
                         <a href="product_detail.php?id=<?= $p['id'] ?>" class="btn btn-outline btn-sm btn-icon" data-tooltip="View Detail">
                             <i class="fas fa-eye"></i>
                         </a>
@@ -450,7 +540,140 @@ $brands     = $db->query("SELECT DISTINCT brand FROM products WHERE brand != '' 
 
 </div><!-- .page-body -->
 
+<!-- ================================================================
+     CSV IMPORT MODAL
+================================================================ -->
+<div class="modal-overlay" id="importCsvModal">
+    <div class="modal-box" style="max-width:520px;">
+        <div class="modal-header">
+            <div class="modal-title"><i class="fas fa-file-upload" style="color:var(--success)"></i> Import Products from CSV</div>
+            <button class="modal-close" onclick="closeModal('importCsvModal')"><i class="fas fa-times"></i></button>
+        </div>
+        <form method="POST" enctype="multipart/form-data">
+            <input type="hidden" name="action" value="csv_import">
+            <div class="modal-body">
+                <div style="background:var(--bg-card2);border-radius:var(--radius-md);padding:1rem;margin-bottom:1.25rem;">
+                    <div style="font-size:0.82rem;font-weight:700;color:var(--text-primary);margin-bottom:0.5rem;">
+                        <i class="fas fa-info-circle" style="color:var(--primary);"></i> CSV File Format
+                    </div>
+                    <div style="font-size:0.75rem;color:var(--text-muted);line-height:1.6;">
+                        Your CSV file should have headers in this order:<br>
+                        <code style="background:var(--bg-main);padding:0.2rem 0.5rem;border-radius:4px;font-size:0.72rem;">Name, SKU, Category, Brand, Price, Quantity, Min Stock, Description</code><br>
+                        <strong>Name</strong> and <strong>Category</strong> are required. SKU will be auto-generated if blank.
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Select CSV File</label>
+                    <div style="position:relative;border:2px dashed var(--border-color);border-radius:12px;padding:2rem;text-align:center;transition:var(--transition);cursor:pointer;"
+                         onmouseover="this.style.borderColor='var(--primary)'" onmouseout="this.style.borderColor='var(--border-color)'">
+                        <input type="file" name="csv_file" accept=".csv,.txt" required
+                               style="position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;">
+                        <i class="fas fa-cloud-upload-alt" style="font-size:2rem;color:var(--primary);margin-bottom:0.75rem;display:block;"></i>
+                        <div style="font-weight:600;font-size:0.875rem;color:var(--text-primary);">Click or drag a CSV file</div>
+                        <div style="font-size:0.72rem;color:var(--text-muted);margin-top:0.25rem;">Supports .csv and .txt files</div>
+                    </div>
+                </div>
+                <a href="data:text/csv;charset=utf-8,Name,SKU,Category,Brand,Price,Quantity,Min Stock,Description%0ACarbon Brush 6mm,SKU-CB6,Drill Parts,Bosch,120.00,50,10,Replacement carbon brushes%0AGrinding Disc 100mm,,Grinder Accessories,Makita,65.00,100,15,Metal grinding disc" 
+                   download="torvo_product_import_template.csv" 
+                   style="display:flex;align-items:center;gap:0.5rem;font-size:0.78rem;color:var(--primary);text-decoration:none;margin-top:0.5rem;">
+                    <i class="fas fa-download"></i> Download Sample Template
+                </a>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline" onclick="closeModal('importCsvModal')">Cancel</button>
+                <button type="submit" class="btn btn-success"><i class="fas fa-upload"></i> Import Products</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ================================================================
+     VIEW SUITABLE MACHINES MODAL
+================================================================ -->
+<div class="modal-overlay" id="viewSuitableModal">
+    <div class="modal-box" style="max-width:400px;">
+        <div class="modal-header">
+            <div class="modal-title"><i class="fas fa-link" style="color:var(--primary);"></i> Suitable Machines</div>
+            <button class="modal-close" onclick="closeModal('viewSuitableModal')"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="modal-body">
+            <h4 id="vsProductName" style="margin-top:0;margin-bottom:1rem;color:var(--text-primary);font-size:0.9rem;"></h4>
+            <div id="vsList" style="display:flex;flex-direction:column;gap:0.5rem;max-height:300px;overflow-y:auto;"></div>
+        </div>
+    </div>
+</div>
+
+<!-- ================================================================
+     ADD MACHINE MODAL
+================================================================ -->
+<div class="modal-overlay" id="addMachineModal">
+    <div class="modal-box">
+        <div class="modal-header">
+            <div class="modal-title"><i class="fas fa-plug" style="color:var(--primary);"></i> Add Suitable Machine</div>
+            <button class="modal-close" onclick="closeModal('addMachineModal')"><i class="fas fa-times"></i></button>
+        </div>
+        <form method="POST">
+            <input type="hidden" name="action" value="add_machine">
+            <input type="hidden" name="product_id" id="amProductId">
+            <div class="modal-body">
+                <h4 id="amProductName" style="margin-top:0;margin-bottom:1rem;color:var(--text-primary);font-size:0.9rem;"></h4>
+                <div class="form-group">
+                    <label class="form-label">Select Suitable Machines</label>
+                    <div class="check-group" id="amToolsGroup" style="max-height:300px;overflow-y:auto;">
+                        <?php foreach ($tools as $t): ?>
+                        <label class="check-item" id="amTool_<?= $t['id'] ?>">
+                            <input type="checkbox" name="tool_ids[]" value="<?= $t['id'] ?>">
+                            <i class="fas fa-wrench"></i> <?= htmlspecialchars($t['name']) ?>
+                        </label>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline" onclick="closeModal('addMachineModal')">Cancel</button>
+                <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Save Machines</button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <script>
+function viewSuitable(productName, tools) {
+    document.getElementById('vsProductName').innerText = productName;
+    const list = document.getElementById('vsList');
+    list.innerHTML = '';
+    if (tools.length === 0) {
+        list.innerHTML = '<div style="color:var(--text-muted);font-size:0.85rem;">No machines linked.</div>';
+    } else {
+        tools.forEach(t => {
+            list.innerHTML += `<div style="padding:0.6rem;background:var(--bg-main);border-radius:8px;border:1px solid var(--border-color);font-size:0.85rem;display:flex;align-items:center;gap:0.5rem;"><i class="fas fa-wrench" style="color:var(--primary);"></i> ${t}</div>`;
+        });
+    }
+    openModal('viewSuitableModal');
+}
+
+function addMachineToProduct(productId, productName, linkedToolIds) {
+    document.getElementById('amProductId').value = productId;
+    document.getElementById('amProductName').innerText = productName;
+    
+    // Reset all
+    document.querySelectorAll('#amToolsGroup .check-item').forEach(item => {
+        item.querySelector('input').checked = false;
+        item.classList.remove('checked');
+    });
+    
+    // Check linked ones
+    linkedToolIds.forEach(tid => {
+        const el = document.getElementById('amTool_' + tid);
+        if (el) {
+            el.querySelector('input').checked = true;
+            el.classList.add('checked');
+        }
+    });
+
+    openModal('addMachineModal');
+}
+
 // Checkbox check-item style
 document.querySelectorAll('.check-item').forEach(item => {
     const cb = item.querySelector('input[type="checkbox"]');

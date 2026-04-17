@@ -33,6 +33,68 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         header('Location: stock.php'); exit;
     }
+
+    // ---- Send Low Stock Email Alert ----
+    if ($action === 'send_low_stock_alert') {
+        $adminEmail = '';
+        try {
+            $stmt = $db->prepare('SELECT setting_value FROM settings WHERE setting_key = ?');
+            $stmt->execute(['admin_email']);
+            $adminEmail = $stmt->fetchColumn() ?: '';
+        } catch (PDOException $e) {}
+
+        if (!$adminEmail) {
+            setFlash('error', 'Admin email not configured. Go to Settings → Admin Email.');
+        } else {
+            $lowItems = $db->query("
+                SELECT p.name, p.sku, p.quantity, p.min_stock, c.name AS category
+                FROM products p
+                JOIN categories c ON p.category_id = c.id
+                WHERE p.status='active' AND (p.quantity <= p.min_stock)
+                ORDER BY p.quantity ASC
+            ")->fetchAll();
+
+            if (empty($lowItems)) {
+                setFlash('info', 'No low stock items to report!');
+            } else {
+                $siteName = 'TORVO SPAIR';
+                try {
+                    $stmt = $db->prepare('SELECT setting_value FROM settings WHERE setting_key = ?');
+                    $stmt->execute(['site_title']);
+                    $siteName = $stmt->fetchColumn() ?: 'TORVO SPAIR';
+                } catch (PDOException $e) {}
+
+                $subject = "⚠️ Low Stock Alert — $siteName (" . count($lowItems) . " items)";
+                $body    = "<html><body style='font-family:sans-serif;color:#1e293b;'>";
+                $body   .= "<h2 style='color:#ef4444;'>Low Stock Alert</h2>";
+                $body   .= "<p>" . count($lowItems) . " product(s) are at or below minimum stock levels.</p>";
+                $body   .= "<table style='width:100%;border-collapse:collapse;font-size:14px;margin-top:1rem;'>";
+                $body   .= "<thead><tr style='background:#f1f5f9;'><th style='padding:8px;text-align:left;border:1px solid #e2e8f0;'>Product</th><th style='padding:8px;text-align:left;border:1px solid #e2e8f0;'>SKU</th><th style='padding:8px;text-align:left;border:1px solid #e2e8f0;'>Category</th><th style='padding:8px;text-align:center;border:1px solid #e2e8f0;'>Stock</th><th style='padding:8px;text-align:center;border:1px solid #e2e8f0;'>Min</th></tr></thead><tbody>";
+                foreach ($lowItems as $li) {
+                    $color = $li['quantity'] == 0 ? '#ef4444' : '#f59e0b';
+                    $body .= "<tr><td style='padding:8px;border:1px solid #e2e8f0;'>{$li['name']}</td>";
+                    $body .= "<td style='padding:8px;border:1px solid #e2e8f0;'>{$li['sku']}</td>";
+                    $body .= "<td style='padding:8px;border:1px solid #e2e8f0;'>{$li['category']}</td>";
+                    $body .= "<td style='padding:8px;border:1px solid #e2e8f0;text-align:center;color:{$color};font-weight:bold;'>{$li['quantity']}</td>";
+                    $body .= "<td style='padding:8px;border:1px solid #e2e8f0;text-align:center;'>{$li['min_stock']}</td></tr>";
+                }
+                $body .= "</tbody></table>";
+                $body .= "<p style='margin-top:1rem;font-size:12px;color:#94a3b8;'>Generated on " . date('d M Y, h:ia') . " by $siteName Inventory Management</p>";
+                $body .= "</body></html>";
+
+                $headers  = "MIME-Version: 1.0\r\n";
+                $headers .= "Content-Type: text/html; charset=UTF-8\r\n";
+                $headers .= "From: $siteName <noreply@torvotools.com>\r\n";
+
+                if (@mail($adminEmail, $subject, $body, $headers)) {
+                    setFlash('success', "Low stock alert sent to <strong>$adminEmail</strong> with " . count($lowItems) . " items.");
+                } else {
+                    setFlash('error', "Failed to send email. Check your server's mail configuration (php.ini SMTP settings).");
+                }
+            }
+        }
+        header('Location: stock.php'); exit;
+    }
 }
 
 // ---- Filters ----
@@ -101,7 +163,14 @@ $allProducts = $db->query("SELECT id, name, sku, quantity FROM products WHERE st
         <a href="stock.php?filter=<?= $k ?>" class="btn <?= $filter===$k ? 'btn-primary' : 'btn-outline' ?>"><?= $v ?></a>
         <?php endforeach; ?>
     </div>
-    <div style="display:flex;gap:0.5rem;">
+    <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+        <form method="POST" style="margin:0;">
+            <input type="hidden" name="action" value="send_low_stock_alert">
+            <button type="submit" class="btn btn-outline" style="color:var(--danger);border-color:var(--danger);" 
+                    onclick="return confirm('Send a low stock alert email to the admin?')">
+                <i class="fas fa-envelope-exclamation"></i> Email Alert
+            </button>
+        </form>
         <button class="btn btn-outline" onclick="openModal('scannerModal')" title="Scan Barcode / QR Code">
             <i class="fas fa-barcode"></i> Scan
         </button>

@@ -148,8 +148,6 @@ include __DIR__ . '/includes/header.php';
 
             <!-- Add to RFQ -->
             <form method="POST" style="display:flex;gap:0.75rem;align-items:center;flex-wrap:wrap;">
-            <!-- Add to RFQ -->
-            <form method="POST" style="display:flex;gap:0.75rem;align-items:center;flex-wrap:wrap;">
                 <div style="display:flex;align-items:center;background:#fff;border:1px solid var(--border);border-radius:10px;overflow:hidden;">
                     <button type="button" onclick="const i=document.getElementById('qty');i.value=Math.max(1,+i.value-1)" style="width:38px;height:38px;border:none;background:none;cursor:pointer;font-size:1.1rem;color:var(--text-muted);">−</button>
                     <input type="number" name="quantity" id="qty" value="1" min="1" max="10000" style="width:60px;text-align:center;border:none;outline:none;font-size:0.95rem;font-weight:700;">
@@ -171,16 +169,21 @@ include __DIR__ . '/includes/header.php';
 
     <!-- Exploded View & Spare Parts Section -->
     <?php
-    // Fetch diagram parts if they exist
-    $diagStmt = $db->prepare("
-        SELECT dp.*, p.name, p.sku, p.price, p.image, p.quantity 
-        FROM diagram_parts dp 
-        JOIN products p ON dp.part_product_id = p.id 
-        WHERE dp.parent_product_id = ? 
-        ORDER BY CAST(dp.number_on_diagram AS UNSIGNED) ASC
-    ");
-    $diagStmt->execute([$pid]);
-    $diagramParts = $diagStmt->fetchAll();
+    // Fetch diagram parts if they exist (table may not be present)
+    $diagramParts = [];
+    try {
+        $diagStmt = $db->prepare("
+            SELECT dp.*, p.name, p.sku, p.price, p.image, p.quantity 
+            FROM diagram_parts dp 
+            JOIN products p ON dp.part_product_id = p.id 
+            WHERE dp.parent_product_id = ? 
+            ORDER BY CAST(dp.number_on_diagram AS UNSIGNED) ASC
+        ");
+        $diagStmt->execute([$pid]);
+        $diagramParts = $diagStmt->fetchAll();
+    } catch (PDOException $e) {
+        // diagram_parts table doesn't exist yet – silently skip
+    }
     
     // Check if this tool has an exploded view
     $hasDiagram = !empty($p['diagram_image']) || !empty($diagramParts);

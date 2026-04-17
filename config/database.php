@@ -48,7 +48,11 @@ function getDB(): PDO {
             ];
             $pdo = new PDO($dsn, DB_USER, DB_PASS, $options);
         } catch (PDOException $e) {
-            $msg = htmlspecialchars($e->getMessage());
+            // For production security, do not expose exact PDO exceptions to the user
+            $msg = (strpos($_SERVER['HTTP_HOST'] ?? '', 'localhost') !== false) 
+                ? htmlspecialchars($e->getMessage()) 
+                : 'Connection failed. Please verify your database credentials.';
+                
             die("<!DOCTYPE html><html><head><meta charset='UTF-8'><title>Database Error – TORVO SPAIR</title>
             <link href='https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap' rel='stylesheet'>
             <style>body{font-family:'Inter',sans-serif;background:#0f0c29;color:#fff;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;flex-direction:column;gap:1rem;text-align:center;padding:2rem;}
@@ -56,7 +60,7 @@ function getDB(): PDO {
             code{background:rgba(255,255,255,0.08);padding:0.5rem 1rem;border-radius:8px;font-size:0.8rem;display:block;margin-top:1rem;color:#f87171;}
             a{display:inline-block;margin-top:1.5rem;padding:0.75rem 2rem;background:linear-gradient(135deg,#6c63ff,#48daf5);border-radius:8px;color:#fff;text-decoration:none;font-weight:700;}</style></head>
             <body><div class='icon'>⚠️</div><h1>Database Connection Failed</h1>
-            <p>Could not connect to MySQL. Please ensure you have updated config/database.php with your live cPanel database credentials.</p>
+            <p>Could not connect to MySQL. Please ensure you have updated config/db_config.php with your live cPanel database credentials.</p>
             <code>$msg</code>
             <a href='" . APP_URL . "/setup.php'>Go to Setup</a></body></html>");
         }

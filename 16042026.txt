@@ -1,0 +1,8 @@
+What to do next:
+A new file named torvo_spair_production.zip has been created in your project root! You only need to follow these steps to put it on cPanel:
+
+Upload torvo_spair_production.zip to your cPanel public_html/ (or the folder where your domain points) and extract it.
+In cPanel MySQL Databases, create a new live database and user.
+Open config/db_config.php on the live server and paste your cPanel DB name, DB user, and Password in.
+Finally, visit https://yourdomain.com/setup.php in your browser. This will automatically fire the setup triggers, build out the final tables (invoices, guide_pdfs, etc), construct the assets/uploads/ folders, and wire everything up. (Once you see "Setup Complete", be sure to delete setup.php from your server!)
+You're fully good to go on launching! Have a great deployment and let me know if anything pops up on the live server 😊

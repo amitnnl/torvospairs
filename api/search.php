@@ -10,6 +10,12 @@ if (strlen($q) < 2) {
 
 $like = '%' . $q . '%';
 
+// Determine base URL for links
+$protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || (isset($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] == 443)) ? "https://" : "http://";
+$host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+$base_dir = (strpos($host, 'localhost') !== false || strpos($host, '127.0.0.1') !== false) ? '/torvo_spair' : '';
+$appUrl = $protocol . $host . $base_dir;
+
 // Products
 $stmt = $db->prepare("
     SELECT p.id, p.name, p.sku, p.price, p.quantity, p.image, 'product' AS type,
@@ -33,10 +39,44 @@ $stmt2 = $db->prepare("
 $stmt2->execute([$like, $like, $like]);
 $tools = $stmt2->fetchAll();
 
-$results = array_merge($products, $tools);
+// Merge and add computed fields for frontend dropdown
+$results = [];
+foreach ($products as $r) {
+    $results[] = [
+        'id'       => $r['id'],
+        'type'     => 'product',
+        'title'    => $r['name'],
+        'sub'      => $r['sku'] . ' · ' . $r['category'],
+        'badge'    => $r['quantity'] > 0 ? 'In Stock' : 'Out of Stock',
+        'url'      => $appUrl . '/pages/product_detail.php?id=' . $r['id'],
+        'name'     => $r['name'],
+        'sku'      => $r['sku'],
+        'price'    => $r['price'],
+        'quantity' => $r['quantity'],
+        'image'    => $r['image'],
+        'category' => $r['category'],
+    ];
+}
+foreach ($tools as $r) {
+    $results[] = [
+        'id'       => $r['id'],
+        'type'     => 'tool',
+        'title'    => $r['name'],
+        'sub'      => $r['brand'] ?: 'Power Tool',
+        'badge'    => 'Tool',
+        'url'      => $appUrl . '/pages/products.php?tool=' . $r['id'],
+        'name'     => $r['name'],
+        'sku'      => '',
+        'price'    => 0,
+        'quantity' => 0,
+        'image'    => '',
+        'category' => 'Power Tool',
+    ];
+}
 
 apiResponse(200, [
     'query'   => $q,
     'count'   => count($results),
     'results' => $results,
 ]);
+

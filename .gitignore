@@ -2,3 +2,4 @@ config/db_config.php
 .env
 node_modules/
 .DS_Store
+scratch/

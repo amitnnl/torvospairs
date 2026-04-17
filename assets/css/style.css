@@ -672,6 +672,11 @@ textarea.form-control { min-height: 100px; resize: vertical; }
         display: grid !important;
         grid-template-columns: repeat(2, 1fr) !important;
     }
+    /* Dashboard charts & low stock / activity grids */
+    [style*="grid-template-columns:1fr 1fr"],
+    [style*="grid-template-columns: 1fr 1fr"] {
+        grid-template-columns: 1fr !important;
+    }
 }
 @media (max-width: 480px) {
     [style*="grid-template-columns:repeat(4,1fr)"] {

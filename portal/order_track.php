@@ -8,8 +8,6 @@ $db  = portalDB();
 $cid = $customer['id'];
 $oid = (int)($_GET['id'] ?? 0);
 
-$db->exec("CREATE TABLE IF NOT EXISTS `orders` (`id` INT AUTO_INCREMENT PRIMARY KEY, `order_number` VARCHAR(30) UNIQUE, `rfq_id` INT DEFAULT NULL, `customer_id` INT NOT NULL DEFAULT 0, `status` ENUM('pending','confirmed','processing','dispatched','delivered','cancelled') DEFAULT 'pending', `subtotal` DECIMAL(10,2) DEFAULT 0.00, `gst_rate` DECIMAL(5,2) DEFAULT 18.00, `gst_amount` DECIMAL(10,2) DEFAULT 0.00, `total_amount` DECIMAL(10,2) DEFAULT 0.00, `shipping_address` TEXT, `payment_status` ENUM('unpaid','paid','partial') DEFAULT 'unpaid', `tracking_info` VARCHAR(255), `admin_notes` TEXT, `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP, `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
-
 $order = $db->prepare("SELECT * FROM orders WHERE id=? AND customer_id=?");
 $order->execute([$oid, $cid]);
 $o = $order->fetch();

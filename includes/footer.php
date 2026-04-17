@@ -42,10 +42,11 @@ function confirmDelete(msg) {
             fetch(`<?= APP_URL ?>/api/search.php?q=${encodeURIComponent(q)}`)
                 .then(r => r.json())
                 .then(data => {
-                    if (!data.results || !data.results.length) {
+                    const results = (data.data && data.data.results) || data.results || [];
+                    if (!results.length) {
                         dropdown.innerHTML = `<div style="padding:1rem;font-size:0.83rem;color:var(--text-muted);text-align:center;">No results for "<strong>${q}</strong>"</div>`;
                     } else {
-                        dropdown.innerHTML = data.results.map(r => `
+                        dropdown.innerHTML = results.map(r => `
                             <a href="${r.url}" style="display:flex;align-items:center;gap:0.75rem;padding:0.65rem 1rem;border-bottom:1px solid var(--border-color);text-decoration:none;transition:background 0.15s;" onmouseover="this.style.background='var(--bg-card2)'" onmouseout="this.style.background=''">
                                 <div style="width:32px;height:32px;border-radius:8px;background:${r.type==='product'?'rgba(108,99,255,0.1)':'rgba(72,218,245,0.1)'};display:flex;align-items:center;justify-content:center;flex-shrink:0;">
                                     <i class="fas fa-${r.type==='product'?'box':'tools'}" style="font-size:0.8rem;color:${r.type==='product'?'var(--primary)':'var(--accent)'}"></i>
